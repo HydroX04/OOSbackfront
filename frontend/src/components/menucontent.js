@@ -143,7 +143,7 @@ const menuData = {
     <Modal.Title>{selectedItem}</Modal.Title>
   </Modal.Header>
   <Modal.Body>
-    <div className="container-fluid">
+    <div className="container">
       <div className="row">
         <div className="col-md-6">
           <div className="modal-image-placeholder">
@@ -154,11 +154,10 @@ const menuData = {
         </div>
         <div className="col-md-6">
           <h4 style={{ color: '#4b929d' }}>{selectedItem}</h4>
-          <p className="text-muted">
-            A Coffee Drink Made With Espresso And Steamed Milk, Sweetened With Condensed Milk
+          <p className="text-muted">A Coffee Drink Made With Espresso And Steamed Milk, Sweetened With Condensed Milk
             For A Creamy And Slightly Sweet Flavor.
           </p>
-          <p className="h5">₱59</p>
+          <p className="h5" style={{ textAlign: 'left' }}>₱59</p>
           
           {/* Horizontal Group for Size and Type */}
           <div className="row mt-4">
