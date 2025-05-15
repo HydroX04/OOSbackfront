@@ -35,46 +35,58 @@ const Signup = () => {
     backgroundColor: '#f8f9fa' // Light gray background
   };
 
-  const placeholderStyles = {
-    color: '#8E9292', // Bootstrap's secondary text color
-    opacity: '1' // Ensure full visibility
-  };
-
   return (
-    <div className="container-fluid min-vh-100 d-flex justify-content-center align-items-center p-3" 
-         style={{background: 'linear-gradient(135deg, #EBF5F6, #abdfe7, #65b2c2, #90bfc7)'}}>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      background: 'linear-gradient(135deg, #EBF5F6, #abdfe7, #65b2c2, #90bfc7)',
+      padding: '20px',
+      boxSizing: 'border-box'
+    }}>
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar={true} />
-      <div className="row g-0 w-100 shadow-lg" style={{maxWidth: '850px', borderRadius: '18px', overflow: 'hidden'}}>
+      <div style={{
+        display: 'flex',
+        maxWidth: '850px',
+        width: '100%',
+        borderRadius: '18px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        backgroundColor: 'white'
+      }}>
         {/* Form Column */}
-        <div className="col-md-6 bg-white p-4 p-lg-4 d-flex flex-column justify-content-center">
-          <div className="text-center mb-3">
-            <img src={logo} alt="Logo" className="rounded-circle" style={{width: '70px', height: '70px', objectFit: 'cover'}} />
+        <div style={{
+          flex: 1,
+          padding: '30px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center'
+        }}>
+          <div style={{textAlign: 'center', marginBottom: '20px'}}>
+            <img src={logo} alt="Logo" style={{width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto'}} />
           </div>
-          <h2 className="text-center mb-1 fs-4" style={{color: '#5EA5B3', fontWeight: '700'}}>Create Account</h2>
-          <p className="text-center mb-3 fs-6" style={{color: '#5BA7B4', fontWeight: '300'}}>Please fill in your details to sign up.</p>
+          <h2 style={{textAlign: 'center', marginBottom: '10px', color: '#5EA5B3', fontWeight: '700'}}>Create Account</h2>
+          <p style={{textAlign: 'center', marginBottom: '20px', color: '#5BA7B4', fontWeight: '300'}}>Please fill in your details to sign up.</p>
 
           <form onSubmit={handleSubmit}>
-            <div className="mb-2">
-              <label htmlFor="fullName" className="form-label mb-1 fs-6" style={{color: '#5EA5B3', fontWeight: '500'}}>Full Name</label>
+            <div style={{marginBottom: '15px'}}>
+              <label htmlFor="fullName" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Full Name</label>
               <input
                 type="text"
-                className="form-control form-control-sm"
                 id="fullName"
                 placeholder="Enter your full name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 style={inputStyles}
-                onFocus={(e) => e.target.placeholder = ''}
-                onBlur={(e) => e.target.placeholder = 'Enter your full name'}
               />
             </div>
 
-            <div className="mb-2">
-              <label htmlFor="phone" className="form-label mb-1 fs-6" style={{color: '#5EA5B3', fontWeight: '500'}}>Phone</label>
+            <div style={{marginBottom: '15px'}}>
+              <label htmlFor="phone" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Phone</label>
               <input
                 type="text"
-                className="form-control form-control-sm"
                 id="phone"
                 placeholder="Enter your phone number"
                 value={phone}
@@ -84,11 +96,10 @@ const Signup = () => {
               />
             </div>
 
-            <div className="mb-2">
-              <label htmlFor="email" className="form-label mb-1 fs-6" style={{color: '#5EA5B3', fontWeight: '500'}}>Email</label>
+            <div style={{marginBottom: '15px'}}>
+              <label htmlFor="email" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Email</label>
               <input
                 type="email"
-                className="form-control form-control-sm"
                 id="email"
                 placeholder="Sample@gmail.com"
                 value={email}
@@ -98,91 +109,108 @@ const Signup = () => {
               />
             </div>
 
-            <div className="mb-2 position-relative">
-              <label htmlFor="password" className="form-label mb-1 fs-6" style={{color: '#5EA5B3', fontWeight: '500'}}>Password</label>
-              <div className="input-group">
+            <div style={{marginBottom: '15px', position: 'relative'}}>
+              <label htmlFor="password" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Password</label>
+              <div style={{position: 'relative'}}>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  className="form-control form-control-sm"
                   id="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  style={inputStyles}
+                  style={{...inputStyles, paddingRight: '40px'}}
                 />
                 <button 
-                  className="btn btn-outline-secondary position-absolute end-0 top-50 translate-middle-y"
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{border: 'none', background: 'transparent'}}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    color: '#5BA7B4'
+                  }}
                 >
-                  {showPassword ? <EyeOff size={18} color="#5BA7B4" /> : <Eye size={18} color="#5BA7B4" />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            <div className="mb-3 position-relative">
-              <label htmlFor="confirmPassword" className="form-label mb-1 fs-6" style={{color: '#5EA5B3', fontWeight: '500'}}>Confirm Password</label>
-              <div className="input-group">
+            <div style={{marginBottom: '20px', position: 'relative'}}>
+              <label htmlFor="confirmPassword" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Confirm Password</label>
+              <div style={{position: 'relative'}}>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
-                  className="form-control form-control-sm"
                   id="confirmPassword"
                   placeholder="Confirm your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  style={inputStyles}
+                  style={{...inputStyles, paddingRight: '40px'}}
                 />
                 <button 
-                  className="btn btn-outline-secondary position-absolute end-0 top-50 translate-middle-y"
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={{border: 'none', background: 'transparent'}}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    color: '#5BA7B4'
+                  }}
                 >
-                  {showConfirmPassword ? <EyeOff size={18} color="#5BA7B4" /> : <Eye size={18} color="#5BA7B4" />}
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
             <button 
               type="submit" 
-              className="btn w-100 mt-2" 
               style={{
-                backgroundColor: '#4B929D', 
-                color: 'white', 
-                borderRadius: '15px', 
-                padding: '8px',
+                width: '100%',
+                padding: '10px',
+                backgroundColor: '#4B929D',
+                color: 'white',
                 border: 'none',
-                fontSize: '0.9rem',
-                transition: 'all 0.3s ease',
+                borderRadius: '15px',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#3d7d87'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#4B929D'}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#3d7d87'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4B929D'}
             >
               Sign Up
             </button>
           </form>
 
-          <div className="text-center mt-3">
-            <small className="text-muted fs-6">
+          <div style={{textAlign: 'center', marginTop: '15px'}}>
+            <small style={{color: '#6c757d'}}>
               Already have an account? <a href="/login" style={{color: '#4B929D', fontWeight: '500', textDecoration: 'none'}}>Log in</a>
             </small>
           </div>
         </div>
 
         {/* Image Column */}
-        <div 
-          className="col-md-6 d-none d-md-block" 
-          style={{
-            backgroundImage: `url(${homeImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            minHeight: '500px'
-          }}
-        ></div>
+        <div style={{
+          flex: 1,
+          display: 'none',
+          backgroundImage: `url(${homeImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '500px',
+          borderTopRightRadius: '18px',
+          borderBottomRightRadius: '18px'
+        }} className="d-md-block">
+        </div>
       </div>
     </div>
   );
