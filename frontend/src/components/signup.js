@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './signup.css'
 
 const Signup = () => {
+  const [username, setUsername] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -21,7 +22,7 @@ const Signup = () => {
       toast.error('Passwords do not match!');
     } else {
       toast.success('Account created successfully!');
-      console.log({ fullName, phone, email, password });
+      console.log({ username, fullName, phone, email, password });
       // Add your signup logic here
     }
   };
@@ -70,6 +71,19 @@ const Signup = () => {
           <p style={{textAlign: 'center', marginBottom: '20px', color: '#5BA7B4', fontWeight: '300'}}>Please fill in your details to sign up.</p>
 
           <form onSubmit={handleSubmit}>
+            <div style={{marginBottom: '15px'}}>
+              <label htmlFor="username" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Username</label>
+              <input
+                type="text"
+                id="username"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                style={inputStyles}
+              />
+            </div>
+
             <div style={{marginBottom: '15px'}}>
               <label htmlFor="fullName" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Full Name</label>
               <input
