@@ -7,10 +7,14 @@ import './header.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
+import { useState } from 'react';
+
 export default function AppHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulated login state
 
   // Function to handle smooth scrolling to sections
   const scrollToSection = (sectionId) => {
@@ -53,7 +57,7 @@ export default function AppHeader() {
   return (
     <Navbar expand="lg" className="bg-body-tertiary">
       <Container className="d-flex align-items-center justify-content-between">
-        {/* Left - Logo */}
+        {/* Left - Logo */}  
         <Navbar.Brand as={Link} to="/" className="me-lg-5 me-0">
           <img
             src={navLogo}
@@ -114,9 +118,21 @@ export default function AppHeader() {
               <Nav.Link as={Link} to="/cart" className="me-3">
                 <img src={cartIcon} alt="Cart" className="cart-img" />
               </Nav.Link>
-              <Nav.Link as={Link} to="/login">
-                <button className="btn btn-outline-primary">Sign In</button>
-              </Nav.Link>
+              {!isLoggedIn ? (
+                <Nav.Link as={Link} to="/login">
+                  <button className="btn btn-outline-primary">Sign In</button>
+                </Nav.Link>
+              ) : (
+                <Nav.Link as={Link} to="/profile" className="me-3">
+                  {/* Placeholder profile icon */}
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                    alt="Profile"
+                    className="profile-icon"
+                    style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+                  />
+                </Nav.Link>
+              )}
               <Nav.Link 
                 as={Link} 
                 to="/menu"

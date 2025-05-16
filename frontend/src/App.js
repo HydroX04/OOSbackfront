@@ -14,6 +14,10 @@ import Cart from './components/cart';
 import Dashboard from './components/admin/dashboard';
 import ManageOrders from './components/admin/manageorders';
 import Sidebar from './components/admin/sidebar';
+import ProfilePage from './components/ProfilePage';
+import ProfileSidebar from './components/ProfileSidebar';
+import OrderHistory from './components/OrderHistory';
+import Notification from './components/Notification';
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 
 function App() {
@@ -31,6 +35,18 @@ const AdminLayout = () => {
       <Sidebar />
       <div className="flex-grow-1">
         <Outlet /> {/* This is where child routes will render */}
+      </div>
+    </div>
+  );
+};
+
+// Profile Layout Component
+const ProfileLayout = () => {
+  return (
+    <div className="d-flex">
+      <ProfileSidebar />
+      <div className="flex-grow-1">
+        <Outlet /> {/* This is where ProfilePage or nested routes will render */}
       </div>
     </div>
   );
@@ -65,7 +81,11 @@ function MainApp() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          
+          <Route element={<ProfileLayout />}>
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/orderhistory" element={<OrderHistory />} />
+            <Route path="/profile/notification" element={<Notification />} />
+          </Route>
           {/* Admin Routes */}
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<Dashboard />} />

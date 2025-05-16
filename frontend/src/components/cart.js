@@ -7,6 +7,7 @@ import './cart.css';
 const Cart = () => {
   const [receiptFile, setReceiptFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -23,6 +24,8 @@ const Cart = () => {
     { id: 2, name: 'Spanish Latte', price: 59, quantity: 1, orderType: 'Delivery' },
     { id: 3, name: 'Spanish Latte', price: 59, quantity: 1, orderType: 'Pick-Up' },
   ]);
+
+  const [showOrderSummary, setShowOrderSummary] = useState(false);
 
   const handleIncrement = (index) => {
     const updatedItems = [...cartItems];
@@ -100,7 +103,7 @@ const Cart = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleCheckoutClick = (e) => {
     e.preventDefault();
     const validationErrors = validate();
 
@@ -111,16 +114,25 @@ const Cart = () => {
       toast.error('Please upload a payment receipt.');
     } else {
       setErrors({});
-      toast.success('Checkout successful!');
-      // Optional: Clear form and cart
-      setFormData({ name: '', address: '', landmark: '', contact: '', email: '' });
-      setReceiptFile(null);
-      setCartItems([]);
+      setShowOrderSummary(true);
     }
-    
   };
 
+  const handleConfirmOrder = () => {
+    // Save order logic here (could be API call)
+    toast.success('Order confirmed! Redirecting...');
+    // Clear only cart items, keep form data and receipt file
+    setCartItems([]);
+    setShowOrderSummary(false);
+    // Redirect after 2 seconds
+    setTimeout(() => {
+      window.location.href = '/profile/orderhistory';
+    }, 2000);
+  };
 
+  const handleCancelOrder = () => {
+    setShowOrderSummary(false);
+  };
 
   return (
     <section className="container-fluid py-3 px-5 mt-5 pt-5" style={{ backgroundColor: '#eaf4f6', minHeight: '100vh' }}>
@@ -244,7 +256,7 @@ const Cart = () => {
                 <a href="#" className="ms-1">GCash App</a>
               </p>
             </div>
-            <form onSubmit={handleSubmit} noValidate>
+            <form onSubmit={handleCheckoutClick} noValidate>
               {['name', 'address', 'landmark', 'contact', 'email'].map((field) => (
                 <div className="mb-2" key={field}>
                   <label className="form-label">
@@ -321,6 +333,154 @@ const Cart = () => {
         </div>
       </div>
       <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} />
+
+      {showOrderSummary && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1050,
+          padding: '20px',
+        }}>
+            <div className="modal-content bg-white p-4 rounded shadow" style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 4px 15px rgba(0,0,0,0.3)', position: 'relative' }}>
+              <button
+                type="button"
+                onClick={handleCancelOrder}
+                aria-label="Close"
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  color: '#4B929D',
+                }}
+              >
+                &times;
+              </button>
+              <h4 className="mb-4 text-center" style={{ color: '#4B929D', fontWeight: '700', fontSize: '1.8rem' }}>Order Summary</h4>
+              <div className="mb-4 modal-address">
+                <h5 className="mb-2" style={{ borderBottom: '2px solid #4B929D', paddingBottom: '4px' }}>Address</h5>
+                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>{formData.name}</p>
+                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>{formData.address}</p>
+                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>{formData.landmark}</p>
+                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>Contact: {formData.contact}</p>
+                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>Email: {formData.email}</p>
+              </div>
+              {receiptFile && (
+                <div className="mb-4">
+                  <h5 className="mb-2" style={{ borderBottom: '2px solid #4B929D', paddingBottom: '4px' }}>Uploaded Payment Receipt</h5>
+                  <p
+                    style={{ color: '#4B929D', cursor: 'pointer', textDecoration: 'underline' }}
+                    onClick={() => {
+                      setShowPreviewModal(true);
+                    }}
+                    title="Click to preview"
+                  >
+                    {receiptFile.name}
+                  </p>
+                </div>
+              )}
+              {showPreviewModal && (
+                <div
+                  className="modal-overlay"
+                  style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.6)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1100,
+                    padding: '20px',
+                  }}
+                  onClick={() => setShowPreviewModal(false)}
+                >
+                  <div
+                    className="modal-content bg-white p-4 rounded shadow"
+                    style={{
+                      maxWidth: '90vw',
+                      maxHeight: '90vh',
+                      overflow: 'auto',
+                      position: 'relative',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setShowPreviewModal(false)}
+                      aria-label="Close"
+                      style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        background: 'transparent',
+                        border: 'none',
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        color: '#4B929D',
+                      }}
+                    >
+                      &times;
+                    </button>
+                    <img
+                      src={URL.createObjectURL(receiptFile)}
+                      alt="Payment Receipt Preview"
+                      style={{ maxWidth: '100%', maxHeight: '80vh', display: 'block', margin: '0 auto' }}
+                    />
+                  </div>
+                </div>
+              )}
+            <div className="mb-4">
+              <h5 className="mb-2" style={{ borderBottom: '2px solid #4B929D', paddingBottom: '4px' }}>Items</h5>
+              <table className="table table-striped table-bordered">
+                <thead className="table-light">
+                  <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Order Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartItems.map((item, i) => (
+                    <tr key={i}>
+                      <td>{item.name}</td>
+                      <td>{item.quantity}</td>
+                      <td>₱{item.price.toFixed(2)}</td>
+                      <td>₱{calculateTotal(item).toFixed(2)}</td>
+                      <td>{item.orderType}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="mb-4 d-flex justify-content-between align-items-center">
+              <h5 style={{ color: '#4B929D', fontWeight: '700' }}>Total</h5>
+              <p style={{ fontWeight: '700', fontSize: '1.2rem' }}>₱{grandTotal.toFixed(2)}</p>
+            </div>
+            <div className="mb-4">
+              <h5 className="mb-2" style={{ borderBottom: '2px solid #4B929D', paddingBottom: '4px' }}>Payment Method</h5>
+              <p>Pay Via QR</p>
+            </div>
+            <div className="d-flex justify-content-end">
+              <button className="btn btn-secondary me-3" onClick={handleCancelOrder} style={{ minWidth: '100px' }}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleConfirmOrder} style={{ minWidth: '100px' }}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </section>
   );
