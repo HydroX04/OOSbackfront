@@ -124,7 +124,7 @@ const OrderHistory = () => {
       <Table className="orders-table">
         <thead>
           <tr>
-            <th>Order ID</th>
+            <th>No.</th>
             <th>Order Type</th>
             <th>Product</th>
             <th>Quantity</th>

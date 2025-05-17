@@ -5,16 +5,15 @@ import navLogo from '../assets/nav.png';
 import cartIcon from '../assets/cart.svg';
 import './header.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-
-import { useState } from 'react';
+import { useEffect, useContext } from 'react';
+import { AuthContext } from './AuthContext';
 
 export default function AppHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulated login state
+  const { isLoggedIn } = useContext(AuthContext);
 
   // Function to handle smooth scrolling to sections
   const scrollToSection = (sectionId) => {
@@ -66,7 +65,7 @@ export default function AppHeader() {
           />
         </Navbar.Brand>
 
-        {/* Toggle for smaller screens */}
+        {/* Toggle for smaller screens */} 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
         {/* Collapsible content */}

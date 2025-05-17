@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // ✅ Import useNavigate
 import logo from '../assets/logo.jpg';
 import homeImage from '../assets/coffee.jpg';
 import { Eye, EyeOff } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // import toast styles
+import 'react-toastify/dist/ReactToastify.css';
 import './login.css';
 
 const LoginPage = () => {
@@ -11,23 +12,59 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate(); // ✅ Initialize navigation
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (username && password) {
-      toast.success('Login successful!', {
-        position: 'top-right',
-        autoClose: 3000,
-      });
-    } else {
+    if (!username || !password) {
       toast.error('Please fill in all fields', {
         position: 'top-right',
         autoClose: 3000,
       });
+      return;
     }
 
-    console.log({ username, password, rememberMe });
+    try {
+      const formBody = new URLSearchParams();
+      formBody.append('username', username);
+      formBody.append('password', password);
+
+      const response = await fetch('http://127.0.0.1:8000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formBody.toString(),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success('Login successful!', {
+          position: 'top-right',
+          autoClose: 1500,
+          onClose: () => navigate('/'), // ✅ Navigate after toast
+        });
+        console.log('Token:', data.access_token);
+        // You can store token with localStorage.setItem('token', data.access_token);
+      } else if (response.status === 401) {
+        toast.error('Invalid credentials', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+      } else {
+        toast.error('Login failed', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('An error occurred during login', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+    }
   };
 
   return (
@@ -51,6 +88,7 @@ const LoginPage = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                autoComplete="username"
               />
             </div>
 
@@ -64,18 +102,22 @@ const LoginPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                 />
                 <span
                   className="toggle-password"
                   onClick={() => setShowPassword(!showPassword)}
+                  style={{ cursor: 'pointer' }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </span>
               </div>
             </div>
 
-            <div className="forgot-password">
-              <a href="/forgot-password"></a>
+            <div className="forgot-password"> 
+              
+              <a href="/forgot-password">Forgot password?</a>
             </div>
 
             <button type="submit" className="login-button">Log In</button>
