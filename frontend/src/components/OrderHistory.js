@@ -82,7 +82,7 @@ const OrderHistory = () => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
-        return <span className="status-badge status-pending">Pending</span>;
+        return <span className="status-badge status-pending">Processing</span>;
       case 'completed':
         return <span className="status-badge status-completed">Completed</span>;
       case 'cancelled':
@@ -165,8 +165,8 @@ const OrderHistory = () => {
                     <div>{product.name}</div>
                   </td>
                   <td>{product.quantity}</td>
-                  <td>${product.price.toFixed(2)}</td>
-                  <td>${(product.price * product.quantity).toFixed(2)}</td>
+                  <td>₱{product.price.toFixed(2)}</td>
+                  <td>₱{(product.price * product.quantity).toFixed(2)}</td>
                   {index === 0 && <td rowSpan={order.products.length}>{getStatusBadge(order.status)}</td>}
                   {index === 0 && (
                     <td rowSpan={order.products.length}>
