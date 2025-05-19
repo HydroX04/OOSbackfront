@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import auth
 
+
 app = FastAPI()
 
 # CORS settings - allow frontend on localhost:3000

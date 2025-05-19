@@ -16,16 +16,46 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match!');
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (password !== confirmPassword) {
+    toast.error('Passwords do not match!');
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:8000/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username,
+        password,
+        full_name: fullName,
+        phone,
+        email
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success(data.message || "Account created successfully!");
+      // Optional: Redirect to login page
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1500);
     } else {
-      toast.success('Account created successfully!');
-      console.log({ username, fullName, phone, email, password });
-      // Add your signup logic here
+      toast.error(data.detail || "Signup failed.");
     }
-  };
+  } catch (error) {
+    console.error("Signup error:", error);
+    toast.error("Something went wrong.");
+  }
+};
+
 
   // Style object for consistent placeholder styling
   const inputStyles = {
