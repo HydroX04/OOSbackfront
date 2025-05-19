@@ -13,14 +13,33 @@ const Forgotpassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       toast.error('Passwords do not match!');
-    } else {
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          new_password: password,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || 'Failed to reset password');
+      }
+
       toast.success('Password successfully reset!');
-      console.log({ email, password });
-      // Add the reset logic here
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -49,12 +68,12 @@ const Forgotpassword = () => {
             </div>
 
             <div className="form-group password-group">
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">New Password</label>
               <div className="password-wrapper">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
-                  placeholder="Enter your password"
+                  placeholder="Enter new password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -74,7 +93,7 @@ const Forgotpassword = () => {
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   id="confirmPassword"
-                  placeholder="Confirm your password"
+                  placeholder="Confirm new password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -88,7 +107,7 @@ const Forgotpassword = () => {
               </div>
             </div>
 
-            <button type="submit" className="login-button">Sign Up</button>
+            <button type="submit" className="login-button">Reset Password</button>
           </form>
 
           <div className="signup-link">

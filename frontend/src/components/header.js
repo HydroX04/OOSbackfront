@@ -13,9 +13,9 @@ export default function AppHeader() {
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
 
-  const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, logout } = useContext(AuthContext); // ✅ Include logout
 
-  // Function to handle smooth scrolling to sections
+  // Scroll to a section by ID
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -23,11 +23,9 @@ export default function AppHeader() {
     }
   };
 
-  // Handle navigation to sections from other pages
   const handleSectionNavigation = (e, section) => {
     if (!isHomePage) {
       e.preventDefault();
-      // Scroll to top first, then navigate and scroll to section
       window.scrollTo(0, 0);
       navigate('/', { state: { scrollTo: section } });
     } else {
@@ -36,27 +34,30 @@ export default function AppHeader() {
     }
   };
 
-  // Handle scroll after navigation
   useEffect(() => {
     if (location.state?.scrollTo) {
       const timer = setTimeout(() => {
         scrollToSection(location.state.scrollTo);
-      }, 100); // Small delay to ensure the page has rendered
+      }, 100);
       return () => clearTimeout(timer);
     }
   }, [location.state]);
 
-  // Scroll to top when pathname changes (except for section navigation)
   useEffect(() => {
     if (!location.state?.scrollTo) {
       window.scrollTo(0, 0);
     }
   }, [location.pathname]);
 
+  const handleLogout = () => {
+    logout(); // ✅ Clear token and update context
+    navigate('/login');
+  };
+
   return (
     <Navbar expand="lg" className="bg-body-tertiary">
       <Container className="d-flex align-items-center justify-content-between">
-        {/* Left - Logo */}  
+        {/* Left - Logo */}
         <Navbar.Brand as={Link} to="/" className="me-lg-5 me-0">
           <img
             src={navLogo}
@@ -65,13 +66,11 @@ export default function AppHeader() {
           />
         </Navbar.Brand>
 
-        {/* Toggle for smaller screens */} 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
-        {/* Collapsible content */}
         <Navbar.Collapse id="basic-navbar-nav">
           <div className="d-flex flex-column flex-lg-row justify-content-between w-100">
-            {/* Center - Navigation links */}
+            {/* Center - Nav Links */}
             <Nav className="mx-auto gap-3 nav-center">
               <Nav.Link 
                 as={Link} 
@@ -112,26 +111,35 @@ export default function AppHeader() {
               </Nav.Link>
             </Nav>
 
-            {/* Right - Cart and Buttons */}
+            {/* Right - Cart and Auth Buttons */}
             <div className="d-flex align-items-center cart-and-buttons">
               <Nav.Link as={Link} to="/cart" className="me-3">
                 <img src={cartIcon} alt="Cart" className="cart-img" />
               </Nav.Link>
+
               {!isLoggedIn ? (
                 <Nav.Link as={Link} to="/login">
                   <button className="btn btn-outline-primary">Sign In</button>
                 </Nav.Link>
               ) : (
-                <Nav.Link as={Link} to="/profile" className="me-3">
-                  {/* Placeholder profile icon */}
-                  <img
-                    src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                    alt="Profile"
-                    className="profile-icon"
-                    style={{ width: '32px', height: '32px', borderRadius: '50%' }}
-                  />
-                </Nav.Link>
+                <>
+                  <Nav.Link as={Link} to="/profile" className="me-3">
+                    <img
+                      src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                      alt="Profile"
+                      className="profile-icon"
+                      style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+                    />
+                  </Nav.Link>
+                  <button
+                    onClick={handleLogout}
+                    className="btn btn-outline-danger me-2"
+                  >
+                    Logout
+                  </button>
+                </>
               )}
+
               <Nav.Link 
                 as={Link} 
                 to="/menu"

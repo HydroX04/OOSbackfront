@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // ✅ Import useNavigate
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
 import homeImage from '../assets/coffee.jpg';
 import { Eye, EyeOff } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './login.css';
+import { AuthContext } from './AuthContext'; // ✅ Import AuthContext
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate(); // ✅ Initialize navigation
+  const navigate = useNavigate();
+
+  const { login, isLoggedIn } = useContext(AuthContext); // ✅ Use login and isLoggedIn from context
+
+  // ✅ Redirect to home if already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/', { replace: true });
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,13 +50,17 @@ const LoginPage = () => {
 
       if (response.ok) {
         const data = await response.json();
+
+        // ✅ Set auth state and replace login page in history
+        login(data.access_token);
+
         toast.success('Login successful!', {
           position: 'top-right',
           autoClose: 1500,
-          onClose: () => navigate('/'), // ✅ Navigate after toast
+          onClose: () => navigate('/', { replace: true }) // ✅ Replace login in history
         });
+
         console.log('Token:', data.access_token);
-        // You can store token with localStorage.setItem('token', data.access_token);
       } else if (response.status === 401) {
         toast.error('Invalid credentials', {
           position: 'top-right',
@@ -115,8 +129,7 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <div className="forgot-password"> 
-              
+            <div className="forgot-password">
               <a href="/forgot-password">Forgot password?</a>
             </div>
 

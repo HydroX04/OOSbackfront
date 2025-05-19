@@ -19,11 +19,15 @@ import ProfileSidebar from './components/ProfileSidebar';
 import OrderHistory from './components/OrderHistory';
 import Notification from './components/Notification';
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
+import { AuthProvider } from './components/AuthContext';  // <-- Import AuthProvider
 
 function App() {
   return (
     <Router>
-      <MainApp />
+      {/* Wrap the entire app in AuthProvider so context is shared */}
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
     </Router>
   );
 }
