@@ -17,12 +17,7 @@ const LoginPage = () => {
 
   const { login, isLoggedIn } = useContext(AuthContext); // ✅ Use login and isLoggedIn from context
 
-  // ✅ Redirect to home if already logged in
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate('/', { replace: true });
-    }
-  }, [isLoggedIn, navigate]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,9 +51,11 @@ const LoginPage = () => {
 
         toast.success('Login successful!', {
           position: 'top-right',
-          autoClose: 1500,
-          onClose: () => navigate('/', { replace: true }) // ✅ Replace login in history
+          autoClose: 1000,
         });
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 1000);
 
         console.log('Token:', data.access_token);
       } else if (response.status === 401) {
@@ -130,7 +127,7 @@ const LoginPage = () => {
             </div>
 
             <div className="forgot-password">
-              <a href="/forgot-password">Forgot password?</a>
+              <a href="/forgot-password"></a>
             </div>
 
             <button type="submit" className="login-button">Log In</button>
