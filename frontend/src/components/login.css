@@ -205,5 +205,18 @@ input[type="password"]:focus {
   .signup-link a:hover {
     text-decoration: underline;
   }
+
+  /* Add input error styles */
+  .input-error input {
+    border-color: red !important;
+  }
+
+  .error-message {
+    color: red;
+    font-size: 13px;
+    margin-top: 4px;
+    margin-left: 2PX;
+    text-align: left;
+  }
   
  

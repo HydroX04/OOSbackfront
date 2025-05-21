@@ -8,19 +8,112 @@ import './signup.css'
 
 const Signup = () => {
   const [username, setUsername] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [isUsernameValid, setIsUsernameValid] = useState(true);
+  const [lastName, setLastName] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
+  const [isLastNameValid, setIsLastNameValid] = useState(true);
+  const [firstName, setFirstName] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');
+  const [isFirstNameValid, setIsFirstNameValid] = useState(true);
+  const [middleName, setMiddleName] = useState('');
+  const [middleNameError, setMiddleNameError] = useState('');
+  const [isMiddleNameValid, setIsMiddleNameValid] = useState(true);
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [isPhoneValid, setIsPhoneValid] = useState(true);
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [isEmailValid, setIsEmailValid] = useState(true);
   const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e) => {
   e.preventDefault();
 
-  if (password !== confirmPassword) {
-    toast.error('Passwords do not match!');
+  // Validate username with regex: alphanumeric, underscores, periods, length 3-30
+  const usernameRegex = /^[a-zA-Z0-9._]{3,30}$/;
+  if (!usernameRegex.test(username)) {
+    setUsernameError('Username must be 3-30 characters and can include letters, numbers, underscores, and periods.');
+    setIsUsernameValid(false);
+    return;
+  }
+
+  // Validate first name, last name, middle name not empty
+  if (!firstName.trim()) {
+    setFirstNameError('First Name is required.');
+    setIsFirstNameValid(false);
+    return;
+  }
+  if (!lastName.trim()) {
+    setLastNameError('Last Name is required.');
+    setIsLastNameValid(false);
+    return;
+  }
+  // Middle name can be optional, but if present validate length
+  if (middleName && middleName.length > 50) {
+    setMiddleNameError('Middle Name must be 50 characters or less.');
+    setIsMiddleNameValid(false);
+    return;
+  }
+
+  // Validate phone number length
+  if (phone.length !== 11) {
+    setPhoneError('Phone number must be exactly 11 digits.');
+    setIsPhoneValid(false);
+    return;
+  }
+
+  // Validate email format and non-empty
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email.trim()) {
+    setEmailError('Email is required.');
+    setIsEmailValid(false);
+    return;
+  } else if (!emailRegex.test(email)) {
+    setEmailError('Invalid email format.');
+    setIsEmailValid(false);
+    return;
+  }
+
+  // Clear previous errors
+  setPasswordError('');
+  setConfirmPasswordError('');
+
+  let hasError = false;
+
+  // Password validation: length 12-64, allow spaces, unicode, special chars, must have uppercase, digit and special char
+  if (password.length < 12   || password.length > 64) {
+    setPasswordError('Password must be between 12 and 64 characters long.');
+    hasError = true;
+  }
+  // Check for at least one uppercase letter
+  else if (!/[A-Z]/.test(password)) {
+    setPasswordError('Password must contain at least one uppercase letter.');
+    hasError = true;
+  }
+  // Check for at least one digit
+  else if (!/\d/.test(password)) {
+    setPasswordError('Password must contain at least one digit.');
+    hasError = true;
+  }
+  // Check for at least one special character (non-alphanumeric)
+  else if (!/[^a-zA-Z0-9\s]/.test(password)) {
+    setPasswordError('Password must contain at least one special character.');
+    hasError = true;
+  }
+  // Check if passwords match
+  else if (password !== confirmPassword) {
+    setConfirmPasswordError('Passwords do not match!');
+    hasError = true;
+  }
+
+  // If any errors, do not submit
+  if (hasError) {
     return;
   }
 
@@ -33,7 +126,9 @@ const Signup = () => {
       body: JSON.stringify({
         username,
         password,
-        full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
+        middle_name: middleName,
         phone,
         email
       })
@@ -68,7 +163,7 @@ const Signup = () => {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      height: '100vh',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -79,7 +174,7 @@ const Signup = () => {
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar={true} />
       <div style={{
         display: 'flex',
-        maxWidth: '850px',
+        maxWidth: '1080px',
         width: '100%',
         borderRadius: '18px',
         overflow: 'hidden',
@@ -101,70 +196,273 @@ const Signup = () => {
           <p style={{textAlign: 'center', marginBottom: '20px', color: '#5BA7B4', fontWeight: '300'}}>Please fill in your details to sign up.</p>
 
           <form onSubmit={handleSubmit}>
-            <div style={{marginBottom: '15px'}}>
-              <label htmlFor="username" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Username</label>
+            <div style={{marginBottom: '13px'}}>
+              <label htmlFor="username" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Username <span style={{color: 'red'}}>*</span></label>
               <input
                 type="text"
                 id="username"
                 placeholder="Enter your username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow only alphanumeric, underscore, period, max length 30
+                  const usernameRegex = /^[a-zA-Z0-9._]{0,30}$/;
+                  if (usernameRegex.test(value)) {
+                    setUsername(value);
+                    setUsernameError('');
+                    setIsUsernameValid(true);
+                  }
+                }}
+                onBlur={async () => {
+                  // Check if username is taken
+                  if (username.length < 3) {
+                    setUsernameError('Username must be at least 3 characters.');
+                    setIsUsernameValid(false);
+                    return;
+                  }
+                  try {
+                    const response = await fetch(`http://localhost:8000/check-username?username=${encodeURIComponent(username)}`);
+                    const data = await response.json();
+                    if (!data.available) {
+                      setUsernameError('Username already taken');
+                      setIsUsernameValid(false);
+                    } else {
+                      // Clear error only if username length >= 3
+                      if (username.length >= 3) {
+                        setUsernameError('');
+                        setIsUsernameValid(true);
+                      }
+                    }
+                  } catch (error) {
+                    // On error, assume username is valid to not block user
+                    if (username.length >= 3) {
+                      setUsernameError('');
+                      setIsUsernameValid(true);
+                    }
+                  }
+                }}
                 required
-                style={inputStyles}
+                style={{
+                  ...inputStyles,
+                  borderColor: isUsernameValid ? inputStyles.borderColor : 'red',
+                  color: isUsernameValid ? inputStyles.color : 'red'
+                }}
               />
+              {usernameError && (
+                <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {usernameError}
+                </div>
+              )}
             </div>
 
-            <div style={{marginBottom: '15px'}}>
-              <label htmlFor="fullName" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Full Name</label>
+            <div style={{marginBottom: '10px', display: 'flex', gap: '10px'}}>
+              <div style={{flex: 1}}>
+                <label htmlFor="lastName" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Last Name <span style={{color: 'red'}}>*</span></label>
               <input
                 type="text"
-                id="fullName"
-                placeholder="Enter your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                id="lastName"
+                placeholder="Enter your last name"
+                value={lastName}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow only letters, spaces, hyphens, apostrophes, max length 50
+                  const nameRegex = /^[a-zA-Z\s'-]{0,50}$/;
+                  if (nameRegex.test(value)) {
+                    setLastName(value);
+                    setLastNameError('');
+                    setIsLastNameValid(true);
+                  }
+                }}
+                onBlur={() => {
+                  if (!lastName.trim()) {
+                    setLastNameError('Last Name is required.');
+                    setIsLastNameValid(false);
+                  }
+                }}
                 required
-                style={inputStyles}
+                style={{
+                  ...inputStyles,
+                  borderColor: isLastNameValid ? inputStyles.borderColor : 'red',
+                  color: isLastNameValid ? inputStyles.color : 'red'
+                }}
               />
-            </div>
-
-            <div style={{marginBottom: '15px'}}>
-              <label htmlFor="phone" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Phone</label>
+              {lastNameError && (
+                <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {lastNameError}
+                </div>
+              )}
+              </div>
+              <div style={{flex: 1}}>
+                <label htmlFor="firstName" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>First Name <span style={{color: 'red'}}>*</span></label>
               <input
                 type="text"
-                id="phone"
-                placeholder="Enter your phone number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                id="firstName"
+                placeholder="Enter your first name"
+                value={firstName}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow only letters, spaces, hyphens, apostrophes, max length 50
+                  const nameRegex = /^[a-zA-Z\s'-]{0,50}$/;
+                  if (nameRegex.test(value)) {
+                    setFirstName(value);
+                    setFirstNameError('');
+                    setIsFirstNameValid(true);
+                  }
+                }}
+                onBlur={() => {
+                  if (!firstName.trim()) {
+                    setFirstNameError('First Name is required.');
+                    setIsFirstNameValid(false);
+                  }
+                }}
                 required
-                style={inputStyles}
+                style={{
+                  ...inputStyles,
+                  borderColor: isFirstNameValid ? inputStyles.borderColor : 'red',
+                  color: isFirstNameValid ? inputStyles.color : 'red'
+                }}
               />
+              {firstNameError && (
+                <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {firstNameError}
+                </div>
+              )}
+              </div>
+            </div>
+            <div style={{marginBottom: '10px', display: 'flex', gap: '10px'}}>
+              <div style={{flex: 1}}>
+                <label htmlFor="middleName" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Middle Name</label>
+                <input
+                  type="text"
+                  id="middleName"
+                  placeholder="Enter your middle name"
+                  value={middleName}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow only letters, spaces, hyphens, apostrophes, max length 50
+                    const nameRegex = /^[a-zA-Z\s'-]{0,50}$/;
+                    if (nameRegex.test(value)) {
+                      setMiddleName(value);
+                      setMiddleNameError('');
+                      setIsMiddleNameValid(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (middleName && !middleName.trim()) {
+                      setMiddleNameError('Middle Name cannot be empty if entered.');
+                      setIsMiddleNameValid(false);
+                    }
+                  }}
+                  style={{
+                    ...inputStyles,
+                    borderColor: isMiddleNameValid ? inputStyles.borderColor : 'red',
+                    color: isMiddleNameValid ? inputStyles.color : 'red'
+                  }}
+                />
+                {middleNameError && (
+                  <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>
+                    {middleNameError}
+                  </div>
+                )}
+              </div>
+
+              <div style={{flex: 1}}>
+                <label htmlFor="phone" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Phone <span style={{color: 'red'}}>*</span></label>
+                <input
+                  type="text"
+                  id="phone"
+                  placeholder="Enter your phone number"
+                  value={phone}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow only digits, max length 11
+                    const phoneRegex = /^[0-9]{0,11}$/;
+                    if (phoneRegex.test(value)) {
+                      setPhone(value);
+                      setPhoneError('');
+                      setIsPhoneValid(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (phone.length !== 11) {
+                      setPhoneError('Phone number must be exactly 11 digits.');
+                      setIsPhoneValid(false);
+                    }
+                  }}
+                  required
+                  style={{
+                    ...inputStyles,
+                    borderColor: isPhoneValid ? inputStyles.borderColor : 'red',
+                    color: isPhoneValid ? inputStyles.color : 'red'
+                  }}
+                />
+                {phoneError && (
+                  <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>
+                    {phoneError}
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div style={{marginBottom: '15px'}}>
-              <label htmlFor="email" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Email</label>
+            <div style={{marginBottom: '10px'}}>
+              <label htmlFor="email" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Email <span style={{color: 'red'}}>*</span></label>
               <input
                 type="email"
                 id="email"
                 placeholder="Sample@gmail.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailError('');
+                  setIsEmailValid(true);
+                }}
+                onBlur={() => {
+                  // Validate email format and non-empty
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if (!email.trim()) {
+                    setEmailError('Email is required.');
+                    setIsEmailValid(false);
+                  } else if (!emailRegex.test(email)) {
+                    setEmailError('Invalid email format.');
+                    setIsEmailValid(false);
+                  }
+                }}
                 required
-                style={inputStyles}
+                style={{
+                  ...inputStyles,
+                  borderColor: isEmailValid ? inputStyles.borderColor : 'red',
+                  color: isEmailValid ? inputStyles.color : 'red'
+                }}
               />
+              {emailError && (
+                <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {emailError}
+                </div>
+              )}
             </div>
 
-            <div style={{marginBottom: '15px', position: 'relative'}}>
-              <label htmlFor="password" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Password</label>
+            <div style={{marginBottom: '10px', position: 'relative'}}>
+              <label htmlFor="password" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Password <span style={{color: 'red'}}>*</span></label>
               <div style={{position: 'relative'}}>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  style={{...inputStyles, paddingRight: '40px'}}
-                />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{
+                  ...inputStyles,
+                  paddingRight: '40px',
+                  borderColor: passwordError ? 'red' : inputStyles.borderColor,
+                  color: passwordError ? 'red' : inputStyles.color
+                }}
+              />
+              {passwordError && (
+                <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {passwordError}
+                </div>
+              )}
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -185,17 +483,27 @@ const Signup = () => {
             </div>
 
             <div style={{marginBottom: '20px', position: 'relative'}}>
-              <label htmlFor="confirmPassword" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Confirm Password</label>
+              <label htmlFor="confirmPassword" style={{color: '#5EA5B3', fontWeight: '500', display: 'block', marginBottom: '5px'}}>Confirm Password <span style={{color: 'red'}}>*</span></label>
               <div style={{position: 'relative'}}>
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  id="confirmPassword"
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  style={{...inputStyles, paddingRight: '40px'}}
-                />
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                id="confirmPassword"
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                style={{
+                  ...inputStyles,
+                  paddingRight: '40px',
+                  borderColor: confirmPasswordError ? 'red' : inputStyles.borderColor,
+                  color: confirmPasswordError ? 'red' : inputStyles.color
+                }}
+              />
+              {confirmPasswordError && (
+                <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>
+                  {confirmPasswordError}
+                </div>
+              )}
                 <button 
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
