@@ -10,7 +10,9 @@ const Cart = () => {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
     address: '',
     landmark: '',
     contact: '',
@@ -86,7 +88,8 @@ const Cart = () => {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
     if (!formData.address.trim()) newErrors.address = 'Address is required';
     if (!formData.landmark.trim()) newErrors.landmark = 'Landmark is required';
     if (!formData.contact.trim()) {
@@ -257,7 +260,47 @@ const Cart = () => {
               </p>
             </div>
             <form onSubmit={handleCheckoutClick} noValidate>
-              {['name', 'address', 'landmark', 'contact', 'email'].map((field) => (
+              <div className="name-fields-container">
+                <div className="mb-2" style={{ flex: 1 }}>
+                  <label className="form-label">
+                    First Name <span style={{ color: 'red' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                  />
+                  {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
+                </div>
+                <div className="mb-2" style={{ flex: 1 }}>
+                  <label className="form-label">
+                    Middle Name
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="middleName"
+                    value={formData.middleName}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="mb-2" style={{ flex: 1 }}>
+                  <label className="form-label">
+                    Last Name <span style={{ color: 'red' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                  />
+                  {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
+                </div>
+              </div>
+              {['address', 'landmark', 'contact', 'email'].map((field) => (
                 <div className="mb-2" key={field}>
                   <label className="form-label">
                     {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')} <span style={{ color: 'red' }}>*</span>
@@ -367,7 +410,9 @@ const Cart = () => {
               <h4 className="mb-4 text-center" style={{ color: '#4B929D', fontWeight: '700', fontSize: '1.8rem' }}>Order Summary</h4>
               <div className="mb-4 modal-address">
                 <h5 className="mb-2" style={{ borderBottom: '2px solid #4B929D', paddingBottom: '4px' }}>Address</h5>
-                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>{formData.name}</p>
+                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>
+                  {formData.firstName} {formData.middleName} {formData.lastName}
+                </p>
                 <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>{formData.address}</p>
                 <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>{formData.landmark}</p>
                 <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>Contact: {formData.contact}</p>

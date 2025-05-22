@@ -76,7 +76,7 @@ async def register(user: UserCreate):
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     LOCKOUT_THRESHOLD = 5
-    LOCKOUT_DURATION = timedelta(minutes=15)
+    BASE_LOCKOUT_DURATION = timedelta(minutes=15)
 
     conn = await get_db_connection()
     cursor = await conn.cursor()
@@ -88,14 +88,22 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if attempt_row:
         failed_attempts, last_failed_at = attempt_row
         if last_failed_at:
-            # Fix: last_failed_at may already be datetime, so check type before parsing
             if isinstance(last_failed_at, str):
                 last_failed_at_dt = datetime.strptime(last_failed_at, "%Y-%m-%d %H:%M:%S")
             else:
                 last_failed_at_dt = last_failed_at
-            if failed_attempts >= LOCKOUT_THRESHOLD and datetime.utcnow() - last_failed_at_dt < LOCKOUT_DURATION:
+            # Calculate how many times the threshold has been crossed
+            lockout_multiplier = (failed_attempts // LOCKOUT_THRESHOLD)
+            lockout_duration = BASE_LOCKOUT_DURATION * lockout_multiplier
+            time_since_last_fail = datetime.utcnow() - last_failed_at_dt
+            if failed_attempts >= LOCKOUT_THRESHOLD and time_since_last_fail < lockout_duration:
                 await conn.close()
-                raise HTTPException(status_code=403, detail="Account locked due to too many failed login attempts. Please try again later.")
+                raise HTTPException(status_code=403, detail=f"Account locked due to too many failed login attempts. Please try again after {lockout_duration}.")
+            elif failed_attempts >= LOCKOUT_THRESHOLD and time_since_last_fail >= lockout_duration:
+                # Lockout duration expired, reset failed attempts
+                await cursor.execute("UPDATE login_attempts SET failed_attempts = 0, last_failed_at = NULL WHERE username = ?", (form_data.username,))
+                await conn.commit()
+                failed_attempts = 0
 
     await cursor.execute("SELECT * FROM users WHERE username = ?", (form_data.username,))
     row = await cursor.fetchone()
@@ -127,7 +135,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
     # Reset failed attempts on successful login
     if attempt_row:
-        # Instead of deleting, reset failed_attempts to max (5)
         await cursor.execute("UPDATE login_attempts SET failed_attempts = 0, last_failed_at = NULL WHERE username = ?", (form_data.username,))
         await conn.commit()
 
@@ -143,7 +150,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @router.get("/lockout-status")
 async def get_lockout_status(username: str = Query(...)):
     LOCKOUT_THRESHOLD = 5
-    LOCKOUT_DURATION = timedelta(minutes=15)
+    BASE_LOCKOUT_DURATION = timedelta(minutes=15)
 
     conn = await get_db_connection()
     cursor = await conn.cursor()
@@ -159,11 +166,13 @@ async def get_lockout_status(username: str = Query(...)):
             else:
                 last_failed_at_dt = last_failed_at
             time_since_last_fail = datetime.utcnow() - last_failed_at_dt
-            if failed_attempts >= LOCKOUT_THRESHOLD and time_since_last_fail < LOCKOUT_DURATION:
-                remaining = LOCKOUT_DURATION - time_since_last_fail
-                return {"locked": True, "remaining_seconds": int(remaining.total_seconds())}
+            lockout_multiplier = (failed_attempts // LOCKOUT_THRESHOLD)
+            lockout_duration = BASE_LOCKOUT_DURATION * lockout_multiplier
+            if failed_attempts >= LOCKOUT_THRESHOLD and time_since_last_fail < lockout_duration:
+                remaining = lockout_duration - time_since_last_fail
+                return {"locked": True, "remaining_seconds": int(remaining.total_seconds()), "failed_attempts": failed_attempts}
     await conn.close()
-    return {"locked": False, "remaining_seconds": 0}
+    return {"locked": False, "remaining_seconds": 0, "failed_attempts": 0}
 
 # --- Auth dependency ---
 async def get_current_user(token: str = Depends(oauth2_scheme)):

@@ -6,6 +6,40 @@
   margin-left: -250px;  
   object-fit: contain;
 }
+.btn-outline-primary {
+  font-size: 1rem;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-family: 'Poppins', sans-serif;
+  color: #4B929D !important;
+  border: 2px solid #4B929D;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.btn-outline-primary {
+  font-size: 1rem;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-family: 'Poppins', sans-serif;
+  color: #4B929D !important;
+  border: 2px solid #4B929D;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: #4B929D;
+  color: white!important;
+  border-color: #4B929D;
+  outline: none !important;
+  
+}
 
 /* Navbar Styling */
 /* Navbar Styling */
@@ -87,7 +121,10 @@ body {
 
 .btn-outline-primary:hover {
   background-color: #4B929D;
-  color: white;
+  color: white !important;
+  border-color: #4B929D;
+  outline: none !important;
+  box-shadow: none !important;
 }
 .dropdown-item.active,
 .dropdown-item:active {
@@ -105,8 +142,12 @@ color: white !important;
   transition: all 0.3s ease;
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-primary:focus {
   background-color: #d8eaec !important;
+  color: #4B929D !important;
+  outline-color: #4B929D !important;
+ 
 }
 
 /* Responsive Tweaks */
