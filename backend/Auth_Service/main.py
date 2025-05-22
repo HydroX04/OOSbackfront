@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import auth
+from database import init_db
+import asyncio
 
 
 app = FastAPI()
@@ -18,6 +20,10 @@ app.add_middleware(
     allow_methods=["*"],            # Allow all HTTP methods
     allow_headers=["*"],            # Allow all headers
 )
+
+@app.on_event("startup")
+async def on_startup():
+    await init_db()
 
 @app.get("/")
 def read_root():
