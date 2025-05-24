@@ -4,8 +4,8 @@ import { Link, useLocation } from "react-router-dom";  // Import useLocation to 
 import logo from "../../assets/logo.jpg";
 import { 
   HouseDoorFill, 
-  CartFill, 
-  ChatDotsFill, 
+  Truck, 
+  EnvelopeFill, 
   BoxArrowRight 
 } from "react-bootstrap-icons";
 
@@ -64,7 +64,7 @@ const Sidebar = () => {
             className="d-flex align-items-center py-3 text-dark"
             style={{ borderRadius: "8px" }}
           >
-            <CartFill className="me-3" size={18} /> 
+            <Truck className="me-3" size={18} /> 
             <span>Manage Orders</span>
           </Nav.Link>
           <Nav.Link 
@@ -73,7 +73,7 @@ const Sidebar = () => {
             className="d-flex align-items-center py-3 text-dark"
             style={{ borderRadius: "8px" }}
           >
-            <ChatDotsFill className="me-3" size={18} /> 
+            <EnvelopeFill className="me-3" size={18} /> 
             <span>Inbox</span>
           </Nav.Link>
         </Nav>
