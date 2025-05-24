@@ -1,7 +1,7 @@
 .order-margin {
-    padding-right: 30px;  /* Adjust padding instead of margin */
+    padding-right: 10px;  /* Reduced padding */
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start; /* Changed to flex-start */
   }
 
 
@@ -115,20 +115,49 @@
 }
 
 .table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
+  padding: 0;
+  width: 100%;
 }
 
 .search-input {
-  padding: 8px 15px;
-  border: 1px solid #ddd;
+  width: 100%;
   border-radius: 20px;
-  width: 250px;
-  outline: none;
+  border: 1px solid #ced4da;
+  padding: 8px 15px 8px 35px;
+}
+
+.orders-table {
+  width: 100%;
+  margin-top: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.orders-table thead th {
+  background-color: #f8f9fa;
+  color: #4a9ba5;
+  font-weight: 600;
+  padding: 12px 15px;
+  text-align: left;
 }
 
 .search-input:focus {
   border-color: #4a9ba5;
+}
+
+.main-content {
+  padding-top: 35px !important;
+  margin-top: 30px !important;
+  margin-right: 20px;
+}
+
+.manage-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -20px;
 }

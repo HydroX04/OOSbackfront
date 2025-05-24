@@ -11,13 +11,18 @@ import Services from './components/services';
 import Menus from './components/menu';
 import Footer from './components/footer';
 import Cart from './components/cart';
-import Dashboard from './components/admin/dashboard';
-import ManageOrders from './components/admin/manageorders';
-import Sidebar from './components/admin/sidebar';
+import Dashboard from './components/admin2/dashboard';
+import ManageOrders from './components/admin2/manageorders';
+import Sidebar from './components/admin2/sidebar';
 import ProfilePage from './components/ProfilePage';
 import ProfileSidebar from './components/ProfileSidebar';
 import OrderHistory from './components/OrderHistory';
 import Notification from './components/Notification';
+import Products from './components/admin2/products'; 
+import Staff from './components/admin2/Staff';
+import DeliveryManagement from './components/admin2/deliverymanagement';
+import Inbox from './components/admin2/inbox';
+import NotFound from './components/NotFound';
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { AuthProvider } from './components/AuthContext';  // <-- Import AuthProvider
 
@@ -50,7 +55,7 @@ const ProfileLayout = () => {
     <div className="d-flex">
       <ProfileSidebar />
       <div className="flex-grow-1">
-        <Outlet /> {/* This is where ProfilePage or nested routes will render */}
+        <Outlet /> {/* This is where ProfilePage or nested routes will render */} 
       </div>
     </div>
   );
@@ -94,8 +99,14 @@ function MainApp() {
           {/* Admin Routes */}
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/products" element={<Products />} />
             <Route path="/admin/manageorders" element={<ManageOrders />} />
+            <Route path="/admin/inbox" element={<Inbox />} />
+            <Route path="/admin/delivery" element={<DeliveryManagement />} />
+            <Route path="/admin/staff" element={<Staff />} />
           </Route>
+          {/* 404 Not Found Route */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       {!shouldHideHeaderFooter && !location.pathname.startsWith('/admin') && <Footer />}
