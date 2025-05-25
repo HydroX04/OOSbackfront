@@ -171,3 +171,36 @@
     padding: 0 0.5rem;
   }
 }
+
+@media (max-width: 576px) {
+  .menu-section {
+    margin-top: 9rem !important;
+  }
+  .menu-title {
+    font-size: 2rem !important;
+  }
+  .menu-description {
+    font-size: 0.85rem !important;
+  }
+  .card {
+    max-height: 300px !important;
+    padding: 1rem !important;
+  }
+  .card-img-wrapper {
+    height: 180px !important;
+    width: 150px !important;
+    top: 10px !important;
+  }
+  .card-body {
+    margin-top: 150px !important;
+  }
+  .card-body h3 {
+    font-size: 0.85rem !important;
+  }
+  .card-info {
+    font-size: 0.65rem !important;
+  }
+  .carousel .control-dots {
+    display: none !important;
+  }
+}
