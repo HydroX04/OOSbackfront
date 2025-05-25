@@ -90,6 +90,26 @@
     .service-image {
       max-width: 80%; /* Adjust image width on smaller screens */
     }
+
+    .services-header {
+      font-size: 2rem;
+    }
+
+    .semi-cursive-text {
+      font-size: 1.1rem;
+    }
+
+    .franchise-title {
+      font-size: 0.2rem;
+    }
+
+    .franchise-desc {
+      font-size: 0.75rem;
+    }
+
+    .franchise-link {
+      font-size: 0.75rem;
+    }
   }
   
   /* Clean version for the franchise section without container */

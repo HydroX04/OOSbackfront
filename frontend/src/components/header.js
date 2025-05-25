@@ -20,6 +20,41 @@ export default function AppHeader() {
   const { isLoggedIn, logout } = useContext(AuthContext);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
+  // New state for header visibility
+  const [isVisible, setIsVisible] = useState(true);
+  let lastScrollY = window.pageYOffset;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.pageYOffset;
+      if (window.innerWidth <= 576) { // mobile view only
+        if (currentScrollY > lastScrollY) {
+          // scrolling down
+          setIsVisible(false);
+        } else {
+          // scrolling up
+          setIsVisible(true);
+        }
+      } else {
+        setIsVisible(true);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Hide header completely when logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      setIsVisible(false);
+    } else {
+      setIsVisible(true);
+    }
+  }, [isLoggedIn]);
+
   // Notification state and functions (copied from Notification.js)
   const [notifications, setNotifications] = useState([
     {
@@ -129,9 +164,13 @@ export default function AppHeader() {
     }, 200); // delay hiding by 200ms
   };
 
+  if (!isVisible) {
+    return null;
+  }
+
   return (
     <>
-      <Navbar expand="lg" className="bg-body-tertiary">
+      <Navbar expand="lg" className={`bg-body-tertiary`}>
         <Container className="d-flex align-items-center justify-content-between">
           {/* Left - Logo */}
           <Navbar.Brand as={Link} to="/" className="me-lg-5 me-0">
