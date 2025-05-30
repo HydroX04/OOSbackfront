@@ -141,6 +141,10 @@
     margin-bottom: 2rem;
   }
 
+  .about-column p {
+    font-size: 0.9rem;
+  }
+
   .story-section {
     padding: 2rem 1.5rem;
   }
@@ -150,7 +154,7 @@
   }
 
   .story-content p {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .carousel-header {
@@ -158,6 +162,6 @@
   }
 
   .carousel-image {
-    height: 160px;
+    height: 250px;
   }
 }
