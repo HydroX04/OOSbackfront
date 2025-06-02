@@ -112,17 +112,17 @@ async def forgot_password(request: ForgotPasswordRequest, background_tasks: Back
 
     # Check cooldown timer - last request time
     await cursor.execute(
-        "SELECT expires_at FROM password_reset_tokens WHERE email = ? ORDER BY expires_at DESC LIMIT 1",
+        "SELECT TOP 1 expires_at FROM password_reset_tokens WHERE email = ? ORDER BY expires_at DESC",
         (request.email,)
     )
     last_token_row = await cursor.fetchone()
     if last_token_row:
-        last_expires_at_str = last_token_row[0]
-        last_expires_at = datetime.strptime(last_expires_at_str, "%Y-%m-%d %H:%M:%S")
+        last_expires_at_value = last_token_row[0]
+        if isinstance(last_expires_at_value, str):
+            last_expires_at = datetime.strptime(last_expires_at_value, "%Y-%m-%d %H:%M:%S")
+        else:
+            last_expires_at = last_expires_at_value
         cooldown_end = last_expires_at - timedelta(minutes=TOKEN_EXPIRATION_MINUTES - COOLDOWN_MINUTES)
-        if datetime.utcnow() < cooldown_end:
-            await conn.close()
-            raise HTTPException(status_code=429, detail=f"Please wait before requesting another password reset.")
 
     # Invalidate previous tokens for this email
     await cursor.execute(
