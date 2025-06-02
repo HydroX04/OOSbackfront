@@ -112,7 +112,7 @@ async def forgot_password(request: ForgotPasswordRequest, background_tasks: Back
 
     # Check cooldown timer - last request time
     await cursor.execute(
-        "SELECT expires_at FROM password_reset_tokens WHERE email = ? ORDER BY expires_at DESC LIMIT 1",
+        "SELECT TOP 1 expires_at FROM password_reset_tokens WHERE email = ? ORDER BY expires_at DESC",
         (request.email,)
     )
     last_token_row = await cursor.fetchone()
