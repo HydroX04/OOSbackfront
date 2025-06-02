@@ -7,6 +7,20 @@ export const AuthContext = createContext({
   logout: () => {},
 });
 
+// Utility function to validate JWT token expiration
+function isTokenValid(token) {
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const exp = payload.exp;
+    if (!exp) return false;
+    const now = Math.floor(Date.now() / 1000);
+    return exp > now;
+  } catch (error) {
+    return false;
+  }
+}
+
 // AuthProvider component to wrap the app and provide auth state
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -14,8 +28,11 @@ export const AuthProvider = ({ children }) => {
   // Check localStorage for token on mount to set login state
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && isTokenValid(token)) {
       setIsLoggedIn(true);
+    } else {
+      localStorage.removeItem('token');
+      setIsLoggedIn(false);
     }
   }, []);
 
