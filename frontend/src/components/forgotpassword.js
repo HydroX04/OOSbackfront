@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logo from '../assets/logo.jpg';
@@ -7,9 +7,26 @@ import './forgotpassword.css';
 
 const Forgotpassword = () => {
   const [email, setEmail] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (cooldown > 0) {
+      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (cooldown > 0) {
+      toast.error(`Please wait ${cooldown} seconds before sending another reset link.`);
+      return;
+    }
+
+    setIsSending(true);
 
     try {
       const response = await fetch('http://localhost:8000/auth/forgot-password', {
@@ -25,12 +42,18 @@ const Forgotpassword = () => {
 
       const data = await response.json();
       if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('Too many password reset requests. Please try again later.');
+        }
         throw new Error(data.detail || 'Failed to reset password');
       }
 
       toast.success('Password reset request sent!');
+      setCooldown(60); // 60 seconds cooldown
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -55,10 +78,13 @@ const Forgotpassword = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isSending}
               />
             </div>
 
-            <button type="submit" className="login-button">Send Reset Link</button>
+            <button type="submit" className="login-button" disabled={isSending || cooldown > 0}>
+              {cooldown > 0 ? `Please wait (${cooldown}s)` : 'Send Reset Link'}
+            </button>
           </form>
 
           <div className="signup-link">

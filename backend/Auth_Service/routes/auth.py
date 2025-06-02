@@ -52,6 +52,7 @@ class Token(BaseModel):
 class PasswordResetRequest(BaseModel):
     email: EmailStr
     new_password: str
+    token: str
 
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
@@ -311,6 +312,26 @@ async def reset_password(data: PasswordResetRequest):
     conn = await get_db_connection()
     cursor = await conn.cursor()
 
+    # Validate token
+    await cursor.execute(
+        "SELECT expires_at FROM password_reset_tokens WHERE email = ? AND token = ?",
+        (data.email, data.token)
+    )
+    token_row = await cursor.fetchone()
+    if not token_row:
+        await conn.close()
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+    expires_at_str = token_row[0]
+    if isinstance(expires_at_str, str):
+        expires_at = datetime.strptime(expires_at_str, "%Y-%m-%d %H:%M:%S")
+    else:
+        expires_at = expires_at_str
+
+    if expires_at < datetime.utcnow():
+        await conn.close()
+        raise HTTPException(status_code=400, detail="Token has expired")
+
     await cursor.execute("SELECT * FROM users WHERE email = ?", (data.email,))
     user = await cursor.fetchone()
 
@@ -320,6 +341,13 @@ async def reset_password(data: PasswordResetRequest):
 
     hashed_pw = hash_password(data.new_password)
     await cursor.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_pw, data.email))
+
+    # Invalidate token after use
+    await cursor.execute(
+        "DELETE FROM password_reset_tokens WHERE email = ? AND token = ?",
+        (data.email, data.token)
+    )
+
     await conn.commit()
     await conn.close()
 
