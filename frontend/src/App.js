@@ -23,6 +23,7 @@ import Staff from './components/admin2/Staff';
 import DeliveryManagement from './components/admin2/deliverymanagement';
 import Inbox from './components/admin2/inbox';
 import NotFound from './components/NotFound';
+import Resetpassword from './components/Resetpassword';
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { AuthProvider } from './components/AuthContext';  // <-- Import AuthProvider
 
@@ -63,7 +64,7 @@ const ProfileLayout = () => {
 
 function MainApp() {
   const location = useLocation();
-  const hideHeaderFooterPaths = ['/login', '/signup', '/forgot-password', '/admin', '/admin/*'];
+  const hideHeaderFooterPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/Reset-password', '/admin', '/admin/*'];
   const shouldHideHeaderFooter = hideHeaderFooterPaths.some(path => 
     location.pathname.startsWith(path)
   );
@@ -91,6 +92,7 @@ function MainApp() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<Resetpassword />} />
           <Route element={<ProfileLayout />}>
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/orderhistory" element={<OrderHistory />} />

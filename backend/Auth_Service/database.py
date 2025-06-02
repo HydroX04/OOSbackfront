@@ -52,6 +52,16 @@ async def init_db():
     )
     ''')
 
+    # Create password_reset_tokens table if not exists
+    await cursor.execute('''
+    IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='password_reset_tokens' AND xtype='U')
+    CREATE TABLE [dbo].[password_reset_tokens](
+        [email] [varchar](100) NOT NULL,
+        [token] [varchar](255) NOT NULL,
+        [expires_at] [datetime] NOT NULL
+    )
+    ''')
+
     await conn.commit()
     await cursor.close()
     await conn.close()

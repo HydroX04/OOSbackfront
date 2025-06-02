@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status, Query
+from fastapi import APIRouter, HTTPException, Depends, status, Query, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from passlib.context import CryptContext
@@ -7,7 +7,10 @@ from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 from database import get_db_connection
-
+import smtplib
+from email.message import EmailMessage
+import uuid
+from fastapi import BackgroundTasks
 load_dotenv()
 router = APIRouter()
 
@@ -49,6 +52,104 @@ class Token(BaseModel):
 class PasswordResetRequest(BaseModel):
     email: EmailStr
     new_password: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+    reset_link: str
+
+# --- Email sending helper ---
+def send_reset_email(email_to: str, reset_link: str):
+    SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+    SMTP_USERNAME = os.getenv("SMTP_USERNAME", "markregiemagtangob29@gmail.com")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "fiar dxwn amfr kkrp")
+    EMAIL_FROM = os.getenv("EMAIL_FROM", "markregiemagtangob29@gmail.com")
+
+    msg = EmailMessage()
+    msg['Subject'] = "Password Reset Request"
+    msg['From'] = EMAIL_FROM
+    msg['To'] = email_to
+    msg.set_content(f"Please click the following link to reset your password:\n\n{reset_link}\n\nIf you did not request this, please ignore this email.")
+
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.send_message(msg)
+    except Exception as e:
+        print(f"Error sending email: {e}")
+
+
+
+# --- New forgot password route with token ---
+@router.post("/auth/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
+    MAX_REQUESTS_PER_HOUR = 5
+    COOLDOWN_MINUTES = 10
+    TOKEN_EXPIRATION_MINUTES = 15
+
+    conn = await get_db_connection()
+    cursor = await conn.cursor()
+
+    await cursor.execute("SELECT * FROM users WHERE email = ?", (request.email,))
+    user = await cursor.fetchone()
+
+    if not user:
+        await conn.close()
+        raise HTTPException(status_code=404, detail="Email not found")
+
+    # Check recent password reset requests count in the last hour
+    one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+    await cursor.execute(
+        "SELECT COUNT(*) FROM password_reset_tokens WHERE email = ? AND expires_at > ?",
+        (request.email, one_hour_ago.strftime("%Y-%m-%d %H:%M:%S"))
+    )
+    (request_count,) = await cursor.fetchone()
+
+    if request_count >= MAX_REQUESTS_PER_HOUR:
+        await conn.close()
+        raise HTTPException(status_code=429, detail="Too many password reset requests. Please try again later.")
+
+    # Check cooldown timer - last request time
+    await cursor.execute(
+        "SELECT expires_at FROM password_reset_tokens WHERE email = ? ORDER BY expires_at DESC LIMIT 1",
+        (request.email,)
+    )
+    last_token_row = await cursor.fetchone()
+    if last_token_row:
+        last_expires_at_str = last_token_row[0]
+        last_expires_at = datetime.strptime(last_expires_at_str, "%Y-%m-%d %H:%M:%S")
+        cooldown_end = last_expires_at - timedelta(minutes=TOKEN_EXPIRATION_MINUTES - COOLDOWN_MINUTES)
+        if datetime.utcnow() < cooldown_end:
+            await conn.close()
+            raise HTTPException(status_code=429, detail=f"Please wait before requesting another password reset.")
+
+    # Invalidate previous tokens for this email
+    await cursor.execute(
+        "DELETE FROM password_reset_tokens WHERE email = ?",
+        (request.email,)
+    )
+
+    # Generate a unique token for password reset
+    reset_token = str(uuid.uuid4())
+
+    # Store the token and its expiration in the database
+    expires_at = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRATION_MINUTES)
+    await cursor.execute(
+        "INSERT INTO password_reset_tokens (email, token, expires_at) VALUES (?, ?, ?)",
+        (request.email, reset_token, expires_at.strftime("%Y-%m-%d %H:%M:%S"))
+    )
+    await conn.commit()
+
+    # Construct reset link with token and email
+    reset_link_with_token = f"{request.reset_link}?token={reset_token}&email={request.email}"
+
+    # Send reset email in background with tokenized link
+    background_tasks.add_task(send_reset_email, request.email, reset_link_with_token)
+
+    await conn.close()
+    return {"message": "Password reset email sent with token"}
+
 
 # --- Register route ---
 @router.post("/register")
