@@ -43,6 +43,12 @@ const Signup = () => {
     return;
   }
 
+  // Prevent submission if email is invalid or taken
+  if (!isEmailValid) {
+    setEmailError(emailError || 'Please provide a valid email.');
+    return;
+  }
+
   // Validate first name, last name, middle name not empty
   if (!firstName.trim()) {
     setFirstNameError('First Name is required.');
@@ -118,7 +124,7 @@ const Signup = () => {
   }
 
   try {
-    const response = await fetch("http://localhost:8000/register", {
+    const response = await fetch("http://127.0.0.1:8000/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -134,20 +140,25 @@ const Signup = () => {
       })
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      data = null;
+    }
 
     if (response.ok) {
-      toast.success(data.message || "Account created successfully!");
+      toast.success(data?.message || "Account created successfully!");
       // Optional: Redirect to login page
       setTimeout(() => {
         window.location.href = "/login";
       }, 1500);
     } else {
-      toast.error(data.detail || "Signup failed.");
+      toast.error(data?.detail || data?.message || "Signup failed.");
     }
   } catch (error) {
     console.error("Signup error:", error);
-    toast.error("Something went wrong.");
+    toast.error(error.message || "Something went wrong.");
   }
 };
 
@@ -422,10 +433,15 @@ const Signup = () => {
                   if (!email.trim()) {
                     setEmailError('Email is required.');
                     setIsEmailValid(false);
+                    return;
                   } else if (!emailRegex.test(email)) {
                     setEmailError('Invalid email format.');
                     setIsEmailValid(false);
+                    return;
                   }
+                  // No email availability check due to missing backend endpoint
+                  setEmailError('');
+                  setIsEmailValid(true);
                 }}
                 required
                 style={{

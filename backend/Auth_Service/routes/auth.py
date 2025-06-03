@@ -163,7 +163,12 @@ async def register(user: UserCreate):
     if existing_user:
         await conn.close()
         raise HTTPException(status_code=400, detail="Username already exists")
-        
+
+    await cursor.execute("SELECT * FROM users WHERE email = ?", (user.email,))
+    existing_email = await cursor.fetchone()
+    if existing_email:
+        await conn.close()
+        raise HTTPException(status_code=400, detail="Email already exists")
 
     hashed_pw = hash_password(user.password)
     await cursor.execute(
