@@ -1,45 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logo from '../assets/logo.jpg';
 import homeImage from '../assets/coffee.jpg';
-import { Eye, EyeOff } from 'lucide-react';
 import './forgotpassword.css';
 
 const Forgotpassword = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (cooldown > 0) {
+      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match!');
+
+    if (cooldown > 0) {
+      toast.error(`Please wait ${cooldown} seconds before sending another reset link.`);
       return;
     }
 
+    setIsSending(true);
+
     try {
-      const response = await fetch('http://localhost:8000/auth/reset-password', {
+      const response = await fetch('http://localhost:8000/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email,
-          new_password: password,
+          reset_link: 'http://localhost:3000/Reset-password',
         }),
       });
 
       const data = await response.json();
       if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('Too many password reset requests. Please try again later.');
+        }
         throw new Error(data.detail || 'Failed to reset password');
       }
 
-      toast.success('Password successfully reset!');
+      toast.success('Password reset request sent!');
+      setCooldown(60); // 60 seconds cooldown
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -52,7 +66,7 @@ const Forgotpassword = () => {
             <img src={logo} alt="Logo" className="circle-logo" />
           </div>
           <h2>Reset Password</h2>
-          <p>Confirm your new password to continue.</p>
+          <p>Enter your email to receive password reset instructions.</p>
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -64,50 +78,13 @@ const Forgotpassword = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isSending}
               />
             </div>
 
-            <div className="form-group password-group">
-              <label htmlFor="password">New Password</label>
-              <div className="password-wrapper">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  placeholder="Enter new password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <span
-                  className="toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </span>
-              </div>
-            </div>
-
-            <div className="form-group password-group">
-              <label htmlFor="confirmPassword">Confirm Password</label>
-              <div className="password-wrapper">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  id="confirmPassword"
-                  placeholder="Confirm new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-                <span
-                  className="toggle-password"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </span>
-              </div>
-            </div>
-
-            <button type="submit" className="login-button">Reset Password</button>
+            <button type="submit" className="login-button" disabled={isSending || cooldown > 0}>
+              {cooldown > 0 ? `Please wait (${cooldown}s)` : 'Send Reset Link'}
+            </button>
           </form>
 
           <div className="signup-link">
