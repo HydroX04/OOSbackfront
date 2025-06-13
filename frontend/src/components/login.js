@@ -113,7 +113,7 @@ const LoginPage = () => {
       formBody.append('username', trimmedUsername);
       formBody.append('password', trimmedPassword);
 
-      const response = await fetch('http://127.0.0.1:8000/login', {
+      const response = await fetch('http://127.0.0.1:7000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -155,7 +155,7 @@ const LoginPage = () => {
         } else if (response.status === 403) {
         // On lockout, fetch remaining lockout time and failed attempts from backend
         try {
-          const lockoutResponse = await fetch(`http://127.0.0.1:8000/lockout-status?username=${encodeURIComponent(trimmedUsername)}`);
+          const lockoutResponse = await fetch(`http://127.0.0.1:7000/lockout-status?username=${encodeURIComponent(trimmedUsername)}`);
           if (lockoutResponse.ok) {
             const lockoutData = await lockoutResponse.json();
             setIsLockedOut(true);

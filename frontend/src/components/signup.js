@@ -124,7 +124,7 @@ const Signup = () => {
   }
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/register", {
+    const response = await fetch("http://127.0.0.1:7000/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -232,7 +232,7 @@ const Signup = () => {
                     return;
                   }
                   try {
-                    const response = await fetch(`http://localhost:8000/check-username?username=${encodeURIComponent(username)}`);
+                    const response = await fetch(`http://localhost:7000/check-username?username=${encodeURIComponent(username)}`);
                     const data = await response.json();
                     if (!data.available) {
                       setUsernameError('Username already taken');

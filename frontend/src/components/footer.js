@@ -6,7 +6,7 @@ import './footer.css';
 
 const Footer = () => {
   return (
-    <footer className="footer-custom py-4 mt-5">
+<footer className="footer-custom py-3 mt-5">
       <Container>
         <Row className="align-items-center">
           {/* Logo Column - Image Only */}
@@ -16,7 +16,7 @@ const Footer = () => {
                 src={logo} 
                 alt="Bleu Bean Cafe Logo" 
                 className="img-fluid"
-                style={{ maxHeight: '200px', width: 'auto' }}
+                style={{ maxHeight: '140px', width: 'auto' }}
               />
             </div>
           </Col>

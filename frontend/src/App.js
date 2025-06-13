@@ -24,6 +24,7 @@ import Staff from './components/admin2/Staff';
 import DeliveryManagement from './components/admin2/deliverymanagement';
 import Inbox from './components/admin2/inbox';
 import RiderDashboard from './components/admin2/riderdashboard';
+import RiderHome from './components/admin2/riderhome';
 import NotFound from './components/NotFound';
 import Resetpassword from './components/Resetpassword';
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
@@ -69,14 +70,14 @@ const ProfileLayout = () => {
 
 function MainApp() {
   const location = useLocation();
-  const hideHeaderFooterPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/Reset-password', '/admin', '/admin/*'];
-  const shouldHideHeaderFooter = hideHeaderFooterPaths.some(path => 
+  const hideHeaderPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/Reset-password', '/admin', '/admin/*', '/rider/home'];
+  const shouldHideHeader = hideHeaderPaths.some(path => 
     location.pathname.startsWith(path)
   );
   
   return (
     <div className='App'>
-      {!shouldHideHeaderFooter && !location.pathname.startsWith('/admin') && (
+      {!shouldHideHeader && !location.pathname.startsWith('/admin') && (
         <header id='header'>
           <AppHeader />
         </header>
@@ -114,11 +115,13 @@ function MainApp() {
             <Route path="/admin/riderdashboard" element={<RiderDashboard />} />
             <Route path="/admin/staff" element={<Staff />} />
           </Route>
+          {/* Rider Home Route without header/sidebar */}
+          <Route path="/rider/home" element={<RiderHome />} />
           {/* 404 Not Found Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!shouldHideHeaderFooter && !location.pathname.startsWith('/admin') && <Footer />}
+      {!location.pathname.startsWith('/admin') && <Footer />}
     </div>
   );
 }
