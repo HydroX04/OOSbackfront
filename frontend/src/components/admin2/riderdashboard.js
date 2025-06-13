@@ -1,19 +1,21 @@
-  import React, { useState, useEffect } from "react";
-import { Container } from "react-bootstrap";
-import { FaChevronDown, FaBell, FaBoxOpen, FaCheckCircle, FaSpinner, FaTruck, FaFilter, FaClock, FaUser, FaPhone, FaMapMarkerAlt, FaBox, FaTimesCircle, FaTruckPickup, FaTruckMoving, FaUndo } from "react-icons/fa";
-import { Card, Form } from "react-bootstrap";
+import React, { useState, useEffect } from 'react';
+import { FaChevronDown, FaBell, FaBoxOpen, FaCheckCircle, FaDollarSign, FaClock, FaUser, FaPhone, FaMapMarkerAlt, FaBox, FaTruckPickup, FaTruckMoving, FaUndo } from "react-icons/fa";
+import { Container, Card, Form } from "react-bootstrap";
 import riderImage from "../../assets/rider.jpg";
-import "./deliverymanagement.css";
+import "../admin2/manageorder.css";
 
-function DeliveryManagement() {
+function RiderDashboard() {
   const userRole = "Admin";
   const userName = "Lim Alcovendas";
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [toggle, setToggle] = useState("active");
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [riderFilter, setRiderFilter] = useState("all");
+
+  const [selectedRider, setSelectedRider] = useState("rider1");
 
   const [orders, setOrders] = useState([
     {
@@ -29,7 +31,7 @@ function DeliveryManagement() {
         { name: "Blueberry Muffin", quantity: 1, price: 3.25 }
       ],
       total: 14.25,
-      assignedRider: ""
+      assignedRider: "rider1"
     },
     {
       id: "ORD002",
@@ -44,7 +46,7 @@ function DeliveryManagement() {
         { name: "Chocolate Croissant", quantity: 2, price: 5.00 }
       ],
       total: 9.50,
-      assignedRider: ""
+      assignedRider: "rider2"
     },
     {
       id: "ORD003",
@@ -59,7 +61,7 @@ function DeliveryManagement() {
         { name: "Blueberry Scone", quantity: 1, price: 3.00 }
       ],
       total: 12.00,
-      assignedRider: ""
+      assignedRider: "rider1"
     }
   ]);
 
@@ -158,10 +160,10 @@ function DeliveryManagement() {
 
   return (
     <div className="d-flex" style={{ height: "100vh", backgroundColor: "#edf7f9" }}>
-      <Container fluid className="p-4 main-content" style={{ marginLeft: "0px", width: "calc(100% - 0px)" }}>
+      <div className="p-4 main-content" style={{ marginLeft: "0px", width: "100%" }}>
         <header className="manage-header">
           <div className="header-left">
-            <h2 className="page-title">Delivery Management</h2>
+            <h2 className="page-title">Rider Dashboard</h2>
           </div>
           <div className="header-right">
             <div className="header-date">{currentDateFormatted}</div>
@@ -184,95 +186,109 @@ function DeliveryManagement() {
             </div>
           </div>
         </header>
-        <div className="status-labels" style={{ display: "flex", justifyContent: "space-around", marginTop: "10px", marginBottom: "20px", gap: "15px", flexWrap: "wrap" }}>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaClock color="#d39e00" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Pending</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>5 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaCheckCircle color="#198754" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Confirmed</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>3 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaSpinner color="#2980b9" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Preparing</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>7 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaTruckPickup color="#0d6efd" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Picked up</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>4 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaTruckMoving color="#6610f2" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>In transit</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>5 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaTruck color="#198754" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Delivered</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>7 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaUndo color="#fd7e14" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Cancelled/Returned</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>3 orders</span>
-          </Card>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "15px", marginTop: "20px", backgroundColor: "transparent", padding: "10px", borderRadius: "8px" }}>
-          <div style={{ fontWeight: "600", fontSize: "1rem" }}>
-            Orders 6 of 6
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <FaFilter size={20} />
-            <span>Filter:</span>
-            <Form.Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ width: "300px", marginLeft: "8px" }}
+        <Container fluid style={{ backgroundColor: "#a3d3d8", borderRadius: "8px", padding: "20px", marginTop: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+              <img src={riderImage} alt={riders[selectedRider].name} style={{ width: "60px", height: "60px", borderRadius: "50%" }} />
+              <span style={{ color: "#4b929d", fontWeight: "600", fontSize: "1.2rem" }}>{riders[selectedRider].name}</span>
+            </div>
+            <select
+              style={{ height: "30px", width: "200px", fontSize: "1rem", fontWeight: "600", color: "black", borderRadius: "4px", border: "none", backgroundColor: "white" }}
+              value={selectedRider}
+              onChange={(e) => {
+                setSelectedRider(e.target.value);
+                setRiderFilter(e.target.value);
+              }}
             >
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="preparing">Preparing</option>
-              <option value="pickedUp">Picked Up</option>
-              <option value="inTransit">In transit</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="returned">Cancelled/Returned</option>
-            </Form.Select>
-            <Form.Select
-              value={riderFilter}
-              onChange={(e) => setRiderFilter(e.target.value)}
-              style={{ width: "300px", marginLeft: "8px" }}
-            >
-              <option value="all">All Riders</option>
               <option value="rider1">Rider 1</option>
               <option value="rider2">Rider 2</option>
               <option value="rider3">Rider 3</option>
               <option value="rider4">Rider 4</option>
               <option value="rider5">Rider 5</option>
               <option value="rider6">Rider 6</option>
-            </Form.Select>
+            </select>
           </div>
+    <div style={{ display: "flex", justifyContent: "space-around", gap: "20px", flexWrap: "wrap" }}>
+      <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", backgroundColor: "white", color: "#4b929d", borderRadius: "8px" }}>
+        <FaBoxOpen size={32} color="#964b00" />
+        <span style={{ fontSize: "1rem", fontWeight: "400" }}>Active Orders</span>
+        <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>
+          {orders.filter(order => order.assignedRider === selectedRider && order.currentStatus !== "delivered" && order.currentStatus !== "cancelled" && order.currentStatus !== "returned").length} orders
+        </span>
+      </Card>
+      <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", backgroundColor: "white", color: "#4b929d", borderRadius: "8px" }}>
+        <FaCheckCircle size={32} color="#198754" />
+        <span style={{ fontSize: "1rem", fontWeight: "400" }}>Completed</span>
+        <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>
+          {orders.filter(order => order.assignedRider === selectedRider && order.currentStatus === "delivered").length} orders
+        </span>
+      </Card>
+      <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", backgroundColor: "white", color: "#4b929d", borderRadius: "8px" }}>
+        <FaDollarSign size={32} color="#fd7e14" />
+        <span style={{ fontSize: "1rem", fontWeight: "400" }}>Earnings</span>
+        <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>
+          ₱{orders.filter(order => order.assignedRider === selectedRider && order.currentStatus === "delivered").reduce((sum, order) => sum + order.total, 0).toFixed(2)}
+        </span>
+      </Card>
+    </div>
+        </Container>
+        <div style={{ display: "flex", justifyContent: "flex-start", marginTop: "20px" }}>
+          <button
+            style={{
+              padding: "10px 20px",
+              borderRadius: "20px 0 0 20px",
+              border: "1px solid #4b929d",
+              borderRight: "none",
+              cursor: "pointer",
+              backgroundColor: toggle === "active" ? "#4b929d" : "white",
+              color: toggle === "active" ? "white" : "#4b929d"
+            }}
+            onClick={() => setToggle("active")}
+            className={toggle === "active" ? "active-toggle" : ""}
+          >
+            Active Orders
+          </button>
+          <button
+            style={{
+              padding: "10px 20px",
+              borderRadius: "0",
+              border: "1px solid #4b929d",
+              borderRight: "none",
+              cursor: "pointer",
+              backgroundColor: toggle === "all" ? "#4b929d" : "white",
+              color: toggle === "all" ? "white" : "#4b929d"
+            }}
+            onClick={() => setToggle("all")}
+            className={toggle === "all" ? "active-toggle" : ""}
+          >
+            All Orders
+          </button>
+          <button
+            style={{
+              padding: "10px 20px",
+              borderRadius: "0 20px 20px 0",
+              border: "1px solid #4b929d",
+              cursor: "pointer",
+              backgroundColor: toggle === "completed" ? "#4b929d" : "white",
+              color: toggle === "completed" ? "white" : "#4b929d"
+            }}
+            onClick={() => setToggle("completed")}
+            className={toggle === "completed" ? "active-toggle" : ""}
+          >
+            Completed
+          </button>
         </div>
-        {(() => {
-          const filteredOrders = orders
-            .filter(order => (statusFilter === "all" || order.currentStatus === statusFilter))
-            .filter(order => (riderFilter === "all" || order.assignedRider === riderFilter));
-          return (
-            <div style={{
-              display: "flex",
-              gap: "20px",
-              marginTop: "20px",
-              justifyContent: filteredOrders.length === 1 ? "flex-start" : "flex-start",
-              flexWrap: "wrap",
-              alignItems: "flex-start",
-              width: "100%"
-            }}>
-              {filteredOrders.map((order, idx) => (
+        <div style={{ marginTop: "20px", fontWeight: "600", color: "#4b929d" }}>
+          {toggle === "active" && <div>Showing Active Orders</div>}
+          {toggle === "all" && <div>Showing All Orders</div>}
+          {toggle === "completed" && <div>Showing Completed Orders</div>}
+        </div>
+        {toggle === "active" && (
+          <div style={{ display: "flex", gap: "20px", marginTop: "20px", justifyContent: "flex-start", flexWrap: "wrap", alignItems: "flex-start" }}>
+            {orders
+              .filter(order => (statusFilter === "all" || order.currentStatus === statusFilter))
+              .filter(order => (riderFilter === "all" || order.assignedRider === riderFilter))
+              .map((order, idx) => (
                 <Card key={idx} style={{ padding: "20px", textAlign: "left", display: "flex", flexDirection: "column", alignItems: "flex-start", width: "300px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                     <h5 style={{ color: "#4b929d" }}>Order #{order.id}</h5>
@@ -362,12 +378,11 @@ function DeliveryManagement() {
                   </div>
                 </Card>
               ))}
-            </div>
-          );
-        })()}
-      </Container>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-export default DeliveryManagement;
+export default RiderDashboard;

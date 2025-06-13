@@ -7,7 +7,7 @@ import logo from '../../assets/logo.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBars, faHome, faUtensils, faUserFriends,
-  faBox, faCarrot, faCoffee, faTshirt, faEnvelope, faTruck
+  faBox, faCarrot, faCoffee, faTshirt, faEnvelope, faTruck, faMotorcycle
 } from '@fortawesome/free-solid-svg-icons';
 
 function SidebarComponent() {
@@ -48,6 +48,13 @@ function SidebarComponent() {
               Delivery Management
             </MenuItem>
             <MenuItem
+              icon={<FontAwesomeIcon icon={faMotorcycle} />}
+              component={<Link to="/admin/riderdashboard" />}
+              active={location.pathname === '/admin/riderdashboard'}
+            >
+              Rider Dashboard
+            </MenuItem>
+            <MenuItem
               icon={<FontAwesomeIcon icon={faEnvelope} />}
               component={<Link to="/admin/inbox" />}
               active={location.pathname === '/admin/inbox'}
@@ -62,14 +69,7 @@ function SidebarComponent() {
               Staff
             </MenuItem>
 
-            {!collapsed && <div className="section-title">STOCKS</div>}
-            <MenuItem
-              icon={<FontAwesomeIcon icon={faBox} />}
-              component={<Link to="/admin/products" />}
-              active={location.pathname === '/admin/products'}
-            >
-              Products
-            </MenuItem>
+            
  
           </Menu>
         </div>

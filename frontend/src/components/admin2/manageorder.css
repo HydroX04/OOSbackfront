@@ -107,6 +107,7 @@
 
 /* Table Container */
 .table-container {
+  padding-left: 20px!important;
   background-color: white;
   border-radius: 10px;
   padding: 20px;
@@ -115,7 +116,7 @@
 }
 
 .table-header {
-  margin-bottom: 1rem;
+  margin-bottom: 1rem!important;
   padding: 0;
   width: 100%;
 }
@@ -159,5 +160,7 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  margin-top: -20px;
+  margin-top: -30px;
 }
+
+

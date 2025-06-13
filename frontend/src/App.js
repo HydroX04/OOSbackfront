@@ -11,6 +11,7 @@ import Services from './components/services';
 import Menus from './components/menu';
 import Footer from './components/footer';
 import Cart from './components/cart';
+import CheckoutPage from './components/checkoutpage';
 import Dashboard from './components/admin2/dashboard';
 import ManageOrders from './components/admin2/manageorders';
 import Sidebar from './components/admin2/sidebar';
@@ -22,10 +23,14 @@ import Products from './components/admin2/products';
 import Staff from './components/admin2/Staff';
 import DeliveryManagement from './components/admin2/deliverymanagement';
 import Inbox from './components/admin2/inbox';
+import RiderDashboard from './components/admin2/riderdashboard';
 import NotFound from './components/NotFound';
 import Resetpassword from './components/Resetpassword';
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { AuthProvider } from './components/AuthContext';  // <-- Import AuthProvider
+
+
+
 
 function App() {
   return (
@@ -89,6 +94,7 @@ function MainApp() {
           
           <Route path="/menu" element={<Menus />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -105,6 +111,7 @@ function MainApp() {
             <Route path="/admin/manageorders" element={<ManageOrders />} />
             <Route path="/admin/inbox" element={<Inbox />} />
             <Route path="/admin/delivery" element={<DeliveryManagement />} />
+            <Route path="/admin/riderdashboard" element={<RiderDashboard />} />
             <Route path="/admin/staff" element={<Staff />} />
           </Route>
           {/* 404 Not Found Route */}

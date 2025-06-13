@@ -6,7 +6,9 @@ import {
   HouseDoorFill, 
   Truck, 
   EnvelopeFill, 
-  BoxArrowRight 
+  BoxArrowRight,
+  Speedometer,
+  PersonCircle
 } from "react-bootstrap-icons";
 
 const Sidebar = () => {
@@ -55,7 +57,7 @@ const Sidebar = () => {
             className="d-flex align-items-center py-3"
             style={{ color: "#5caab3", borderRadius: "8px" }}
           >
-            <HouseDoorFill className="me-3" size={18} /> 
+            <Speedometer className="me-3" size={18} /> 
             <span>Dashboard</span>
           </Nav.Link>
           <Nav.Link 
@@ -66,6 +68,15 @@ const Sidebar = () => {
           >
             <Truck className="me-3" size={18} /> 
             <span>Manage Orders</span>
+          </Nav.Link>
+          <Nav.Link 
+            as={Link} 
+            to="/admin/riderdashboard" 
+            className="d-flex align-items-center py-3 text-dark"
+            style={{ borderRadius: "8px" }}
+          >
+            <PersonCircle className="me-3" size={18} /> 
+            <span>Rider Dashboard</span>
           </Nav.Link>
           <Nav.Link 
             as={Link} 

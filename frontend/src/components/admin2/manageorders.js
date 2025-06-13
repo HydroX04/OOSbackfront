@@ -57,7 +57,7 @@ const ManageOrders = () => {
 
   return (
 <div className="d-flex" style={{ height: "100vh", backgroundColor: "#edf7f9" }}>
-  <Container fluid className="p-4 main-content" style={{ marginLeft: "0px", width: "calc(100% - 0px)" }}>
+  <Container fluid className="p-4 main-content" style={{ marginLeft: "0px", width: "calc(100% - 0px)", }}>
           <header className="manage-header">
             <div className="header-left">
               <h2 className="page-title">Products</h2>

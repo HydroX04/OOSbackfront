@@ -5,8 +5,41 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import './menu.css';
 
+const sliderStyle = `
+  input[type="range"]#sugarLevelRange {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+  }
+  input[type="range"]#sugarLevelRange::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4b929d;
+    cursor: pointer;
+    margin-top: -6px;
+  }
+  input[type="range"]#sugarLevelRange::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4b929d;
+    cursor: pointer;
+  }
+  input[type="range"]#sugarLevelRange::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #4b929d 0%, #4b929d calc((100% / 100) * var(--value)), #d3d3d3 calc((100% / 100) * var(--value)), #d3d3d3 100%);
+  }
+`;
+
 const menuData = {
-    Drinks: {
+      Drinks: {
       'Barista Choice': ['Iced Americano', 'Hot Latte', 'Caramel Macchiato', 'Mocha Latte'],
       'Specialty Coffee': ['Espresso Tonic', 'Cold Brew', 'Nitro Cold Brew', 'Iced Coffee'],
       'Premium Coffee': ['Hazelnut Latte', 'Caramel Macchiato', 'Vanilla Latte', 'Cinnamon Dolce Latte'],
@@ -27,11 +60,13 @@ const menuData = {
   };
 
 
-  const MenuContent = () => {
+const MenuContent = () => {
     const [selectedCategory, setSelectedCategory] = useState('Drinks');
     const [selectedSubcategory, setSelectedSubcategory] = useState('Barista Choice');
     const [selectedItem, setSelectedItem] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [sugarLevel, setSugarLevel] = useState(50);
+    const [notes, setNotes] = useState('');
   
     const handleCategoryClick = (category, subcategory) => {
       setSelectedCategory(category);
@@ -44,11 +79,11 @@ const menuData = {
       setShowModal(true);
     };
     const handleAddToCart = () => {
-      toast.success(`${selectedItem} added to cart!`);
+      toast.success(`${selectedItem} added to cart! Notes: ${notes}`);
     };
     
     const handleBuyNow = () => {
-      toast.info(`Buying ${selectedItem} now!`);
+      toast.info(`Buying ${selectedItem} now! Notes: ${notes}`);
     };
     
   
@@ -223,57 +258,25 @@ const menuData = {
           {/* Sugar Level */}
           <div className="mt-3">
             <h6>Sugar Level:</h6>
-            <div className="btn-group w-100" role="group">
+            <div>
               <input
-                type="radio"
-                className="btn-check"
-                name="sugar-level"
-                id="sugar-none"
-                autoComplete="off"
+                type="range"
+                min="0"
+                max="100"
+                step="25"
+                value={sugarLevel}
+                onChange={(e) => setSugarLevel(e.target.value)}
+                className="form-range"
+                id="sugarLevelRange"
+                style={{ accentColor: '#4b929d' }}
               />
-              <label className="btn btn-outline-secondary" htmlFor="sugar-none">
-                No sugar
-              </label>
-              
-              <input
-                type="radio"
-                className="btn-check"
-                name="sugar-level"
-                id="sugar-low"
-                autoComplete="off"
-              />
-              <label className="btn btn-outline-secondary" htmlFor="sugar-low">
-                5%
-              </label>
-              
-              <input
-                type="radio"
-                className="btn-check"
-                name="sugar-level"
-                id="sugar-medium"
-                autoComplete="off"
-                defaultChecked
-              />
-              <label className="btn btn-outline-secondary" htmlFor="sugar-medium">
-                50%
-              </label>
-              
-              <input
-                type="radio"
-                className="btn-check"
-                name="sugar-level"
-                id="sugar-high"
-                autoComplete="off"
-              />
-              <label className="btn btn-outline-secondary" htmlFor="sugar-high">
-                100%
-              </label>
+              <div className="mt-2" style={{ textAlign: 'left' }}>{sugarLevel}%</div>
             </div>
           </div>
           
           {/* Add-ons */}
           <div className="mt-3">
-            <h6>Adds on:</h6>
+            <h6>Add-ons:</h6>
             <div className="form-check">
               <input className="form-check-input" type="checkbox" id="espresso-shot" />
               <label className="form-check-label" htmlFor="espresso-shot">
@@ -293,35 +296,21 @@ const menuData = {
               </label>
             </div>
           </div>
+
+          {/* Notes */}
+          <div className="mt-3">
+            <h6>Notes:</h6>
+            <textarea
+              className="form-control"
+              rows="3"
+              placeholder="Add any notes for your order..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
           
           {/* Order Method */}
-          <div className="mt-4">
-            <h6>Order method:</h6>
-            <div className="btn-group w-100" role="group">
-              <input
-                type="radio"
-                className="btn-check"
-                name="order-method"
-                id="method-pickup"
-                autoComplete="off"
-                defaultChecked
-              />
-              <label className="btn btn-outline-secondary" htmlFor="method-pickup">
-                Pickup
-              </label>
-              
-              <input
-                type="radio"
-                className="btn-check"
-                name="order-method"
-                id="method-delivery"
-                autoComplete="off"
-              />
-              <label className="btn btn-outline-secondary" htmlFor="method-delivery">
-                Delivery
-              </label>
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>

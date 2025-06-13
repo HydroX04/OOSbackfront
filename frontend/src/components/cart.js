@@ -1,13 +1,19 @@
 import React, { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import qrImage from '../assets/qr.png';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './cart.css';
 
 const Cart = () => {
+  const navigate = useNavigate();
+
   const [receiptFile, setReceiptFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [paymentMethodMain, setPaymentMethodMain] = useState('Cash');
+  const [orderTypeMain, setOrderTypeMain] = useState('Pick Up');
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -26,8 +32,25 @@ const Cart = () => {
     { id: 2, name: 'Spanish Latte', price: 59, quantity: 1, orderType: 'Delivery' },
     { id: 3, name: 'Spanish Latte', price: 59, quantity: 1, orderType: 'Pick-Up' },
   ]);
+  const [selectedCartItems, setSelectedCartItems] = useState([]);
 
-  const [showOrderSummary, setShowOrderSummary] = useState(false);
+  // Function to handle checkbox change for individual items
+  const handleCheckboxChange = (item, checked) => {
+    if (checked) {
+      setSelectedCartItems(prev => [...prev, item]);
+    } else {
+      setSelectedCartItems(prev => prev.filter(ci => ci.id !== item.id));
+    }
+  };
+
+  // Function to handle select all checkbox
+  const handleSelectAllChange = (checked) => {
+    if (checked) {
+      setSelectedCartItems(cartItems);
+    } else {
+      setSelectedCartItems([]);
+    }
+  };
 
   const handleIncrement = (index) => {
     const updatedItems = [...cartItems];
@@ -108,17 +131,8 @@ const Cart = () => {
 
   const handleCheckoutClick = (e) => {
     e.preventDefault();
-    const validationErrors = validate();
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      toast.error('Please fill in all required fields correctly.');
-    } else if (!receiptFile) {
-      toast.error('Please upload a payment receipt.');
-    } else {
-      setErrors({});
-      setShowOrderSummary(true);
-    }
+    // Remove validation and toast notifications to always navigate to checkout
+    navigate('/checkout');
   };
 
   const handleConfirmOrder = () => {
@@ -126,15 +140,10 @@ const Cart = () => {
     toast.success('Order confirmed! Redirecting...');
     // Clear only cart items, keep form data and receipt file
     setCartItems([]);
-    setShowOrderSummary(false);
     // Redirect after 2 seconds
     setTimeout(() => {
       window.location.href = '/profile/orderhistory';
     }, 2000);
-  };
-
-  const handleCancelOrder = () => {
-    setShowOrderSummary(false);
   };
 
   return (
@@ -142,391 +151,245 @@ const Cart = () => {
       <div className="row">
         {/* Cart Section */}
         <div className="col-lg-8 mb-4">
-  <div className="bg-white p-4 shadow-sm" style={{ borderRadius: '20px' }}>
-    <div className="d-flex justify-content-between align-items-center mb-3">
-      <h3 className="fw-bold" style={{ color: '#4B929D' }}>Cart</h3>
-      <span className="fw-semibold">{cartItems.length} Items</span>
-    </div>
-    <div className="table-responsive">
-      <table className="table align-middle" style={{ tableLayout: 'fixed' }}>
-        <colgroup>
-          <col style={{ width: '25%' }} /> {/* Product */}
-          <col style={{ width: '15%' }} /> {/* Quantity */}
-          <col style={{ width: '15%' }} /> {/* Price */}
-          <col style={{ width: '18%' }} /> {/* Total - increased width */}
-          <col style={{ width: '17%' }} /> {/* Order Type - increased width */}
-          <col style={{ width: '10%' }} /> {/* Actions - reduced width */}
-        </colgroup>
-        <thead>
-          <tr style={{ color: '#4B929D', verticalAlign: 'middle' }}>
-            <th style={{ verticalAlign: 'middle' }}>Product</th>
-            <th style={{ verticalAlign: 'middle', textAlign: 'center' }}>Quantity</th>
-            <th style={{ verticalAlign: 'middle', textAlign: 'right' }}>Price</th>
-            <th style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '63px' }}>Total</th>
-            <th style={{ verticalAlign: 'middle', paddingLeft: '20px' }}>Order Type</th>
-            <th style={{ verticalAlign: 'middle' }}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {cartItems.map((item, i) => (
-            <tr key={i}>
-              <td style={{ verticalAlign: 'middle' }}>
-                <div className="d-flex align-items-center">
-                  <img
-                    src="https://via.placeholder.com/60"
-                    alt="product"
-                    className="img-fluid me-2 rounded"
-                    style={{ height: '60px', width: '60px', objectFit: 'cover' }}
-                  />
-                  <div>
-                    <div className="fw-semibold">Specialty Coffee</div>
-                    <div className="text-muted" style={{ fontSize: '0.9rem' }}>
-                      {item.name}
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-                <div className="d-flex align-items-center justify-content-center">
-                  <button
-                    className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
-                    style={{
-                      backgroundColor: '#4B929D',
-                      color: 'white',
-                      border: 'none',
-                      width: '30px',
-                      height: '30px',
-                      padding: '0',
-                    }}
-                    onClick={() => handleDecrement(i)}
-                  >
-                    -
-                  </button>
-                  <span className="mx-2" style={{ minWidth: '20px', textAlign: 'center' }}>
-                    {item.quantity}
-                  </span>
-                  <button
-                    className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
-                    style={{
-                      backgroundColor: '#4B929D',
-                      color: 'white',
-                      border: 'none',
-                      width: '30px',
-                      height: '30px',
-                      padding: '0',
-                    }}
-                    onClick={() => handleIncrement(i)}
-                  >
-                    +
-                  </button>
-                </div>
-              </td>
-              <td style={{ verticalAlign: 'middle', textAlign: 'right' }}>₱{item.price.toFixed(2)}</td>
-              <td style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '50px' }}>₱{calculateTotal(item).toFixed(2)}</td>
-              <td style={{ verticalAlign: 'middle', paddingLeft: '20px' }}>{item.orderType}</td>
-              <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-                <button
-                  className="btn btn-link text-danger p-0"
-                  onClick={() => handleRemove(i)}
-                >
-                  <i className="bi bi-trash" style={{ fontSize: '1.2rem' }}></i>
-                </button>
-              </td>
-            </tr>
-          ))}
-          <tr>
-            <td colSpan="3" className="text-end fw-bold" style={{ verticalAlign: 'right',  }}>Grand Total:</td>
-            <td className="fw-bold" style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '50px' }}>₱{grandTotal.toFixed(2)}</td>
-            <td colSpan="2"></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-
-        {/* Pay Online Section */}
-        <div className="col-lg-4">
           <div className="bg-white p-4 shadow-sm" style={{ borderRadius: '20px' }}>
-            <h5 className="fw-bold mb-3 text-center">Pay Online</h5>
-            <div className="text-center mb-3">
-              <img src={qrImage} alt="QR Code" className="img-fluid mb-2" style={{ maxHeight: '180px' }} />
-              <div className="fw-semibold">Pay Via QR</div>
-              <div className="text-muted small">09123445573 | Dynar Tubigan</div>
-              <p className="small text-muted mt-1">
-                When using phone you can Screenshot the QR Code provided in the system and upload it in your
-                <a href="#" className="ms-1">GCash App</a>
-              </p>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h3 className="fw-bold" style={{ color: '#4B929D' }}>Cart</h3>
+              <span className="fw-semibold">{cartItems.length} Items</span>
             </div>
-            <form onSubmit={handleCheckoutClick} noValidate>
-              <div className="name-fields-container">
-                <div className="mb-2" style={{ flex: 1 }}>
-                  <label className="form-label">
-                    First Name <span style={{ color: 'red' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                  />
-                  {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
-                </div>
-                <div className="mb-2" style={{ flex: 1 }}>
-                  <label className="form-label">
-                    Middle Name
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="middleName"
-                    value={formData.middleName}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="mb-2" style={{ flex: 1 }}>
-                  <label className="form-label">
-                    Last Name <span style={{ color: 'red' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-                  {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
-                </div>
-              </div>
-              {['address', 'landmark', 'contact', 'email'].map((field) => (
-                <div className="mb-2" key={field}>
-                  <label className="form-label">
-                    {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')} <span style={{ color: 'red' }}>*</span>
-                  </label>
-                  <input
-                    type={field === 'email' ? 'email' : 'text'}
-                    className={`form-control ${errors[field] ? 'is-invalid' : ''}`}
-                    name={field}
-                    value={formData[field]}
-                    onChange={handleChange}
-                  />
-                  {errors[field] && <div className="invalid-feedback">{errors[field]}</div>}
-                </div>
-              ))}
-              <div className="mb-3">
-                <label className="form-label">Upload Payment Receipt<span style={{ color: 'red' }}> *</span></label>
-                <input
-                  type="file"
-                  id="receipt-upload"
-                  className="d-none"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                />
-                <label
-                  htmlFor="receipt-upload"
-                  className={`border rounded p-4 text-center ${dragActive ? 'border-primary' : ''}`}
-                  style={{
-                    backgroundColor: dragActive ? '#f0f8ff' : '#f8f9fa',
-                    display: 'block',
-                    cursor: 'pointer'
-                  }}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  {receiptFile ? (
-                    <div>
-                      <i className="bi bi-file-earmark-check-fill text-success" style={{ fontSize: '2rem' }}></i>
-                      <p className="mt-2 mb-1">{receiptFile.name}</p>
-                      <small className="text-muted d-block mb-2">
-                        {(receiptFile.size / 1024).toFixed(2)} KB
-                      </small>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-secondary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setReceiptFile(null);
-                        }}
-                      >
-                        <i className="bi bi-arrow-repeat me-1"></i> Change File
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      <i className={`bi ${dragActive ? 'bi-cloud-arrow-up-fill text-primary' : 'bi-cloud-arrow-up'}`}
-                        style={{ fontSize: '2rem' }}></i>
-                      <p className="mt-2 mb-1">Drag & Drop or Click to Browse</p>
-                      <small className="text-muted">
-                        <i className="bi bi-file-image me-1"></i>
-                        Supports JPG, PNG, etc.
-                      </small>
-                    </div>
-                  )}
-                </label>
-              </div>
-              <button type="submit" className="btn w-100" style={{ backgroundColor: '#4B929D', color: 'white' }}>
-                <i className="bi bi-credit-card me-2"></i> Check Out
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-      <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} />
-
-      {showOrderSummary && (
-        <div className="modal-overlay" style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1050,
-          padding: '20px',
-        }}>
-            <div className="modal-content bg-white p-4 rounded shadow" style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 4px 15px rgba(0,0,0,0.3)', position: 'relative' }}>
-              <button
-                type="button"
-                onClick={handleCancelOrder}
-                aria-label="Close"
-                style={{
-                  position: 'absolute',
-                  top: '10px',
-                  right: '10px',
-                  background: 'transparent',
-                  border: 'none',
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  color: '#4B929D',
-                }}
-              >
-                &times;
-              </button>
-              <h4 className="mb-4 text-center" style={{ color: '#4B929D', fontWeight: '700', fontSize: '1.8rem' }}>Order Summary</h4>
-              <div className="mb-4 modal-address">
-                <h5 className="mb-2" style={{ borderBottom: '2px solid #4B929D', paddingBottom: '4px' }}>Address</h5>
-                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>
-                  {formData.firstName} {formData.middleName} {formData.lastName}
-                </p>
-                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>{formData.address}</p>
-                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>{formData.landmark}</p>
-                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>Contact: {formData.contact}</p>
-                <p className="mb-1" style={{ textAlign: 'left', marginLeft: 0, color: 'black' }}>Email: {formData.email}</p>
-              </div>
-              {receiptFile && (
-                <div className="mb-4">
-                  <h5 className="mb-2" style={{ borderBottom: '2px solid #4B929D', paddingBottom: '4px' }}>Uploaded Payment Receipt</h5>
-                  <p
-                    style={{ color: '#4B929D', cursor: 'pointer', textDecoration: 'underline' }}
-                    onClick={() => {
-                      setShowPreviewModal(true);
-                    }}
-                    title="Click to preview"
-                  >
-                    {receiptFile.name}
-                  </p>
-                </div>
-              )}
-              {showPreviewModal && (
-                <div
-                  className="modal-overlay"
-                  style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.6)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 1100,
-                    padding: '20px',
-                  }}
-                  onClick={() => setShowPreviewModal(false)}
-                >
-                  <div
-                    className="modal-content bg-white p-4 rounded shadow"
-                    style={{
-                      maxWidth: '90vw',
-                      maxHeight: '90vh',
-                      overflow: 'auto',
-                      position: 'relative',
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setShowPreviewModal(false)}
-                      aria-label="Close"
-                      style={{
-                        position: 'absolute',
-                        top: '10px',
-                        right: '10px',
-                        background: 'transparent',
-                        border: 'none',
-                        fontSize: '1.5rem',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        color: '#4B929D',
-                      }}
-                    >
-                      &times;
-                    </button>
-                    <img
-                      src={URL.createObjectURL(receiptFile)}
-                      alt="Payment Receipt Preview"
-                      style={{ maxWidth: '100%', maxHeight: '80vh', display: 'block', margin: '0 auto' }}
-                    />
-                  </div>
-                </div>
-              )}
-            <div className="mb-4">
-              <h5 className="mb-2" style={{ borderBottom: '2px solid #4B929D', paddingBottom: '4px' }}>Items</h5>
-              <table className="table table-striped table-bordered">
-                <thead className="table-light">
-                  <tr>
-                    <th>Product</th>
-                    <th>Qty</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                    <th>Order Type</th>
+            <div className="table-responsive">
+              <table className="table align-middle" style={{ tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: '30px' }} /> {/* Checkbox column */}
+                  <col style={{ width: '25%' }} /> {/* Product */}
+                  <col style={{ width: '15%' }} /> {/* Quantity */}
+                  <col style={{ width: '15%' }} /> {/* Price */}
+                  <col style={{ width: '18%' }} /> {/* Total - increased width */}
+                  <col style={{ width: '17%' }} /> {/* Order Type - increased width */}
+                  <col style={{ width: '10%' }} /> {/* Actions - reduced width */}
+                </colgroup>
+                <thead>
+                  <tr style={{ color: '#4B929D', verticalAlign: 'middle' }}>
+                    <th style={{ verticalAlign: 'middle', textAlign: 'center', width: '30px', padding: '0 5px' }}>
+                      <input
+                        type="checkbox"
+                        style={{ margin: 0 }}
+                        onChange={(e) => handleSelectAllChange(e.target.checked)}
+                        checked={selectedCartItems.length === cartItems.length && cartItems.length > 0}
+                      />
+                    </th>
+                    <th style={{ verticalAlign: 'middle' }}>Product</th>
+                    <th style={{ verticalAlign: 'middle', textAlign: 'center' }}>Quantity</th>
+                    <th style={{ verticalAlign: 'middle', textAlign: 'right' }}>Price</th>
+                    <th style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '63px' }}>Total</th>
+                    <th style={{ verticalAlign: 'middle', paddingLeft: '20px' }}>Order Type</th>
+                    <th style={{ verticalAlign: 'middle' }}></th>
                   </tr>
                 </thead>
                 <tbody>
                   {cartItems.map((item, i) => (
                     <tr key={i}>
-                      <td>{item.name}</td>
-                      <td>{item.quantity}</td>
-                      <td>₱{item.price.toFixed(2)}</td>
-                      <td>₱{calculateTotal(item).toFixed(2)}</td>
-                      <td>{item.orderType}</td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'center', width: '30px', padding: '0 5px' }}>
+                        <input
+                          type="checkbox"
+                          style={{ margin: 0 }}
+                          onChange={(e) => handleCheckboxChange(item, e.target.checked)}
+                          checked={selectedCartItems.some(ci => ci.id === item.id)}
+                        />
+                      </td>
+                      <td style={{ verticalAlign: 'middle' }}>
+                        <div className="d-flex align-items-center">
+                          <img
+                            src="https://via.placeholder.com/60"
+                            alt="product"
+                            className="img-fluid me-2 rounded"
+                            style={{ height: '60px', width: '60px', objectFit: 'cover' }}
+                          />
+                          <div>
+                            <div className="fw-semibold">Specialty Coffee</div>
+                            <div className="text-muted" style={{ fontSize: '0.9rem' }}>
+                              {item.name}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+                        <div className="d-flex align-items-center justify-content-center">
+                          <button
+                            className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                            style={{
+                              backgroundColor: '#4B929D',
+                              color: 'white',
+                              border: 'none',
+                              width: '30px',
+                              height: '30px',
+                              padding: '0',
+                            }}
+                            onClick={() => handleDecrement(i)}
+                          >
+                            -
+                          </button>
+                          <span className="mx-2" style={{ minWidth: '20px', textAlign: 'center' }}>
+                            {item.quantity}
+                          </span>
+                          <button
+                            className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                            style={{
+                              backgroundColor: '#4B929D',
+                              color: 'white',
+                              border: 'none',
+                              width: '30px',
+                              height: '30px',
+                              padding: '0',
+                            }}
+                            onClick={() => handleIncrement(i)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'right' }}>₱{item.price.toFixed(2)}</td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '50px' }}>₱{calculateTotal(item).toFixed(2)}</td>
+                      <td style={{ verticalAlign: 'middle', paddingLeft: '20px' }}>{item.orderType}</td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+                        <button
+                          className="btn btn-link text-danger p-0"
+                          onClick={() => handleRemove(i)}
+                        >
+                          <i className="bi bi-trash" style={{ fontSize: '1.2rem' }}></i>
+                        </button>
+                      </td>
                     </tr>
                   ))}
+                  {/* Removed Grand Total row as per user request */}
+                  {/* <tr>
+                    <td colSpan="3" className="text-end fw-bold" style={{ verticalAlign: 'right',  }}>Grand Total:</td>
+                    <td className="fw-bold" style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '50px' }}>₱{grandTotal.toFixed(2)}</td>
+                    <td colSpan="2"></td>
+                  </tr> */}
                 </tbody>
               </table>
             </div>
-            <div className="mb-4 d-flex justify-content-between align-items-center">
-              <h5 style={{ color: '#4B929D', fontWeight: '700' }}>Total</h5>
-              <p style={{ fontWeight: '700', fontSize: '1.2rem' }}>₱{grandTotal.toFixed(2)}</p>
+          </div>
+        </div>
+
+
+        {/* Pay Online Section */}
+        <div className="col-lg-4">
+          <div className="bg-white p-4 shadow-sm" style={{ borderRadius: '20px' }}>
+            <h5 className="fw-bold mb-3 text-center">Order Details</h5>
+            <div className="d-flex justify-content-center">
+              <div className="btn-group-toggle btn-group-toggle-center" role="group" aria-label="Order Type Toggle">
+                <button
+                  type="button"
+                  className={`${orderTypeMain === 'Pick Up' ? 'btn-active-custom' : ''}`}
+                  style={{ minWidth: '120px', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
+                  onClick={() => setOrderTypeMain('Pick Up')}
+                >
+                  <i className="bi bi-bag-fill"></i>
+                  Pick Up
+                </button>
+                <button
+                  type="button"
+                  className={`${orderTypeMain === 'Delivery' ? 'btn-active-custom' : ''}`}
+                  style={{ minWidth: '120px', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
+                  onClick={() => setOrderTypeMain('Delivery')}
+                >
+                  <i className="bi bi-truck"></i>
+                  Delivery
+                </button>
+              </div>
             </div>
-            <div className="mb-4">
-              <h5 className="mb-2" style={{ borderBottom: '2px solid #4B929D', paddingBottom: '4px' }}>Payment Method</h5>
-              <p>Pay Via QR</p>
-            </div>
-            <div className="d-flex justify-content-end">
-              <button className="btn btn-secondary me-3" onClick={handleCancelOrder} style={{ minWidth: '100px' }}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleConfirmOrder} style={{ minWidth: '100px' }}>Confirm</button>
+            <div className="mt-4" style={{ backgroundColor: '#eaf4f6' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '8px' }}>Product</th>
+                    <th style={{ textAlign: 'center', padding: '8px' }}>Quantity</th>
+                    <th style={{ textAlign: 'right', padding: '8px' }}>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedCartItems.map((item, i) => (
+                    <tr key={i}>
+                      <td style={{ padding: '8px' }}>{item.name}</td>
+                      <td style={{ textAlign: 'center', padding: '8px' }}>{item.quantity}</td>
+                      <td style={{ textAlign: 'right', padding: '8px' }}>₱{item.price.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="subtotal-row">
+                    <td style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Subtotal</td>
+                    <td></td>
+                    <td style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>
+                      ₱{selectedCartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)}
+                    </td>
+                  </tr>
+                  {orderTypeMain === 'Delivery' && (
+                    <tr className="delivery-fee-row subtotal-row">
+                      <td style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Delivery Fee</td>
+                      <td></td>
+                      <td style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>
+                        ₱50.00
+                      </td>
+                    </tr>
+                  )}
+                  <tr className="total-row">
+                    <td style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Total</td>
+                    <td></td>
+                    <td style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>
+                      ₱{(selectedCartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) + (orderTypeMain === 'Delivery' ? 50 : 0)).toFixed(2)}
+                    </td>
+                  </tr>
+                  <tr className="payment-method-row">
+                    <td colSpan="3" style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Payment Method</td>
+                  </tr>
+                  <tr>
+                    <td colSpan="3" style={{ padding: '8px', verticalAlign: 'middle', textAlign: 'center' }}>
+                      <div className="btn-group-toggle mt-2" style={{ margin: '0 auto' }}>
+                        <button
+                          type="button"
+                          className={`d-flex align-items-center justify-content-center ${paymentMethodMain === 'Cash' ? 'btn-active-custom' : ''}`}
+                          style={{ minWidth: '120px' }}
+                          onClick={() => setPaymentMethodMain('Cash')}
+                        >
+                          <i className="bi bi-cash-stack"></i>
+                          Cash
+                        </button>
+                        <button
+                          type="button"
+                          className={`d-flex align-items-center justify-content-center ${paymentMethodMain === 'E-Wallet' ? 'btn-active-custom' : ''}`}
+                          style={{ minWidth: '120px' }}
+                          onClick={() => setPaymentMethodMain('E-Wallet')}
+                        >
+                          <i className="bi bi-wallet2"></i>
+                          E-Wallet
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan="3" style={{ padding: '8px', verticalAlign: 'middle' }}>
+                      <div className="d-flex justify-content-center mt-3">
+                        <button
+                          type="button"
+                          className="btn"
+                          style={{ minWidth: '200px', backgroundColor: '#4B929D', color: 'white' }}
+                          onClick={handleCheckoutClick}
+                        >
+                          <i className="bi bi-cart-check me-2"></i>
+                          Checkout
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
             </div>
           </div>
         </div>
-      )}
-
+      </div>
+      <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} />
     </section>
   );
 };
