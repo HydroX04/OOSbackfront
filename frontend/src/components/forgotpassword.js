@@ -29,14 +29,14 @@ const Forgotpassword = () => {
     setIsSending(true);
 
     try {
-      const response = await fetch('http://localhost:8000/auth/forgot-password', {
+      const response = await fetch('http://localhost:7000/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email,
-          reset_link: 'http://localhost:3000/Reset-password',
+          reset_link: 'http://localhost:3001/Reset-password',
         }),
       });
 
