@@ -61,13 +61,6 @@ function SidebarComponent() {
             >
               Inbox
             </MenuItem>
-            <MenuItem
-              icon={<FontAwesomeIcon icon={faUserFriends} />}
-              component={<Link to="/admin/staff" />}
-              active={location.pathname === '/admin/staff'}
-            >
-              Staff
-            </MenuItem>
 
             
  
