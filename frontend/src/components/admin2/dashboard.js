@@ -58,7 +58,7 @@ const data = [
     type: "sales"
   },
   {
-    title: "Today's Revenue",
+    title: "Total Orders",
     current: 18003,
     previous: 17000,
     format: "currency",
@@ -171,7 +171,7 @@ const Dashboard = () => {
           <div className="dashboard-charts">
             <div className="chart-box">
               <div className="chart-header">
-                <span>Revenue</span>
+                <span>Total Orders</span>
                 <select
                   className="chart-dropdown"
                   value={revenueFilter}
