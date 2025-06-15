@@ -10,7 +10,7 @@ origins = [
     # Frontend
     "http://localhost:3001",
     "http://127.0.0.1:3001",
-    "http://192.168.100.10:3001",  # For lnetwork testingocal 
+    "http://192.168.100.10:3001",  # For network testinglocal 
     # Microservices - both localhost and 127.0.0.1 for reliability
     "http://localhost:7000", "http://127.0.0.1:7000",  # Auth Service
     "http://localhost:7001", "http://127.0.0.1:7001",  # Delivery Service
