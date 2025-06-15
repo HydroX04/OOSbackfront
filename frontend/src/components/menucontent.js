@@ -5,60 +5,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import './menu.css';
 
-<<<<<<< HEAD
-const sliderStyle = `
-  input[type="range"]#sugarLevelRange {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 8px;
-    border-radius: 5px;
-    background: #d3d3d3;
-    outline: none;
-  }
-  input[type="range"]#sugarLevelRange::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #4b929d;
-    cursor: pointer;
-    margin-top: -6px;
-  }
-  input[type="range"]#sugarLevelRange::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #4b929d;
-    cursor: pointer;
-  }
-  input[type="range"]#sugarLevelRange::-webkit-slider-runnable-track {
-    height: 8px;
-    border-radius: 5px;
-    background: linear-gradient(to right, #4b929d 0%, #4b929d calc((100% / 100) * var(--value)), #d3d3d3 calc((100% / 100) * var(--value)), #d3d3d3 100%);
-  }
-`;
-
-const menuData = {
-      Drinks: {
-      'Barista Choice': ['Iced Americano', 'Hot Latte', 'Caramel Macchiato', 'Mocha Latte'],
-      'Specialty Coffee': ['Espresso Tonic', 'Cold Brew', 'Nitro Cold Brew', 'Iced Coffee'],
-      'Premium Coffee': ['Hazelnut Latte', 'Caramel Macchiato', 'Vanilla Latte', 'Cinnamon Dolce Latte'],
-      'Non-Coffee': ['Hot Chocolate', 'Matcha Latte', 'Vanilla Bean Frappe', 'Strawberry Smoothie'],
-      'Frappe': ['Mocha Frappe', 'Strawberry Frappe', 'Cookies & Cream Frappe', 'Choco Frappe'],
-      'Sparkling Series': ['Lemon Sparkle', 'Berry Sparkle', 'Citrus Sparkle', 'Mango Sparkle'],
-      'Milk Tea': ['Classic Milk Tea', 'Wintermelon Milk Tea', 'Taro Milk Tea', 'Brown Sugar Milk Tea'],
-    },
-    Food: {
-      'Rice Meals': ['Tapsilog', 'Adobo Rice', 'Longsilog', 'Bacon Rice'],
-      Pasta: ['Carbonara', 'Spaghetti', 'Penne Arrabbiata', 'Mac and Cheese'],
-      Sandwich: ['Ham & Cheese', 'Chicken Sandwich', 'BLT', 'Club Sandwich'],
-      Snacks: ['Fries', 'Nachos', 'Onion Rings', 'Spring Rolls'],
-      Frappe: ['Choco Frappe', 'Cookies & Cream', 'Mango Frappe', 'Caramel Frappe'],
-      'Sparkling Series': ['Food Sparkle 1', 'Food Sparkle 2', 'Food Sparkle 3', 'Food Sparkle 4'],
-      'Milk Tea': ['Brown Sugar MT', 'Okinawa MT', 'Mango Milk Tea', 'Matcha MT'],
-    },
-=======
 
 const MenuContent = () => {
   const [products, setProducts] = useState({});
@@ -121,7 +67,6 @@ const MenuContent = () => {
     setSelectedCategory(category);
     setSelectedSubcategory(subcategory);
     setSelectedItem(null);
->>>>>>> a7dd06a0eab5c70a53a9cd4845d97bf5b8d04734
   };
 
   const handleItemClick = (item) => {
@@ -129,38 +74,6 @@ const MenuContent = () => {
     setShowModal(true);
   };
 
-<<<<<<< HEAD
-const MenuContent = () => {
-    const [selectedCategory, setSelectedCategory] = useState('Drinks');
-    const [selectedSubcategory, setSelectedSubcategory] = useState('Barista Choice');
-    const [selectedItem, setSelectedItem] = useState('');
-    const [showModal, setShowModal] = useState(false);
-    const [sugarLevel, setSugarLevel] = useState(50);
-    const [notes, setNotes] = useState('');
-  
-    const handleCategoryClick = (category, subcategory) => {
-      setSelectedCategory(category);
-      setSelectedSubcategory(subcategory);
-      setSelectedItem('');
-    };
-  
-    const handleItemClick = (itemName) => {
-      setSelectedItem(itemName);
-      setShowModal(true);
-    };
-    const handleAddToCart = () => {
-      toast.success(`${selectedItem} added to cart! Notes: ${notes}`);
-    };
-    
-    const handleBuyNow = () => {
-      toast.info(`Buying ${selectedItem} now! Notes: ${notes}`);
-    };
-    
-  
-    const handleClose = () => setShowModal(false);
-  
-    const currentItems = menuData[selectedCategory]?.[selectedSubcategory] || [];
-=======
   const handleAddToCart = () => {
     if (selectedItem) {
       toast.success(`${selectedItem.ProductName} added to cart!`);
@@ -189,7 +102,6 @@ const MenuContent = () => {
 
   // Get current items based on selected category and subcategory
   const currentItems = (products[selectedCategory] && products[selectedCategory][selectedSubcategory]) || [];
->>>>>>> a7dd06a0eab5c70a53a9cd4845d97bf5b8d04734
 
   return (
     <section className="menu-content-section">
@@ -477,118 +389,9 @@ const MenuContent = () => {
                 Buy Now
               </Button>
             </div>
-<<<<<<< HEAD
-            
-            {/* Type Selection */}
-            <div className="col-md-6">
-              <h6>Type:</h6>
-              <div className="btn-group w-100" role="group">
-                <input
-                  type="radio"
-                  className="btn-check"
-                  name="type"
-                  id="type-hot"
-                  autoComplete="off"
-                  defaultChecked
-                />
-                <label className="btn btn-outline-secondary" htmlFor="type-hot">
-                  Hot
-                </label>
-                
-                <input
-                  type="radio"
-                  className="btn-check"
-                  name="type"
-                  id="type-cold"
-                  autoComplete="off"
-                />
-                <label className="btn btn-outline-secondary" htmlFor="type-cold">
-                  Cold
-                </label>
-              </div>
-            </div>
-          </div>
-          
-          {/* Sugar Level */}
-          <div className="mt-3">
-            <h6>Sugar Level:</h6>
-            <div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="25"
-                value={sugarLevel}
-                onChange={(e) => setSugarLevel(e.target.value)}
-                className="form-range"
-                id="sugarLevelRange"
-                style={{ accentColor: '#4b929d' }}
-              />
-              <div className="mt-2" style={{ textAlign: 'left' }}>{sugarLevel}%</div>
-            </div>
-          </div>
-          
-          {/* Add-ons */}
-          <div className="mt-3">
-            <h6>Add-ons:</h6>
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox" id="espresso-shot" />
-              <label className="form-check-label" htmlFor="espresso-shot">
-                Espresso Shot ₱50
-              </label>
-            </div>
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox" id="seasalt-cream" />
-              <label className="form-check-label" htmlFor="seasalt-cream">
-                Seasalt cream ₱30
-              </label>
-            </div>
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox" id="syrup-sauces" />
-              <label className="form-check-label" htmlFor="syrup-sauces">
-                Syrup/Sauces ₱50
-              </label>
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div className="mt-3">
-            <h6>Notes:</h6>
-            <textarea
-              className="form-control"
-              rows="3"
-              placeholder="Add any notes for your order..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-          </div>
-          
-          {/* Order Method */}
-          
-        </div>
-      </div>
-    </div>
-  </Modal.Body>
-  <Modal.Footer className="justify-content-between">
-    <Button variant="outline-secondary" onClick={handleClose}>
-      Close
-    </Button>
-    <div>
-    <Button variant="outline-primary" className="me-2" onClick={handleAddToCart}>
-      Add to cart
-    </Button>
-    <Button variant="primary" onClick={handleBuyNow}>
-      Buy Now
-    </Button>
-    </div>
-  </Modal.Footer>
-</Modal>
-<ToastContainer position="top-center" autoClose={2000} hideProgressBar />
-=======
           </Modal.Footer>
         </Modal>
         <ToastContainer position="top-center" autoClose={2000} hideProgressBar />
->>>>>>> a7dd06a0eab5c70a53a9cd4845d97bf5b8d04734
       </div>
     </section>
   );

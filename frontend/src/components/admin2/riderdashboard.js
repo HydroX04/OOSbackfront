@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronDown, FaBell, FaBoxOpen, FaCheckCircle, FaDollarSign, FaClock, FaUser, FaPhone, FaMapMarkerAlt, FaBox } from "react-icons/fa";
+import { FaChevronDown, FaBell, FaBoxOpen, FaCheckCircle, FaDollarSign, FaClock, FaUser, FaPhone, FaMapMarkerAlt, FaBox, FaTruckPickup, FaTruckMoving, FaUndo } from "react-icons/fa";
 import { Container, Card, Form } from "react-bootstrap";
 import riderImage from "../../assets/rider.jpg";
 import "../admin2/manageorder.css";
@@ -16,25 +16,72 @@ function RiderDashboard() {
   const [riderFilter, setRiderFilter] = useState("all");
 
   const [selectedRider, setSelectedRider] = useState("rider1");
-  const [orders, setOrders] = useState([]);
+
+  const [orders, setOrders] = useState([
+    {
+      id: "ORD001",
+      status: "Ready for Pickup",
+      currentStatus: "pending",
+      orderedAt: "10:22 PM",
+      customerName: "John Smith",
+      phone: "+1-555-1001",
+      address: "123 Main St, Downtown, City 12345",
+      items: [
+        { name: "Cappuccino (Large)", quantity: 2, price: 11.00 },
+        { name: "Blueberry Muffin", quantity: 1, price: 3.25 }
+      ],
+      total: 14.25,
+      assignedRider: "rider1"
+    },
+    {
+      id: "ORD002",
+      status: "Preparing",
+      currentStatus: "pending",
+      orderedAt: "11:15 AM",
+      customerName: "Jane Doe",
+      phone: "+1-555-2002",
+      address: "456 Oak St, Uptown, City 67890",
+      items: [
+        { name: "Latte (Medium)", quantity: 1, price: 4.50 },
+        { name: "Chocolate Croissant", quantity: 2, price: 5.00 }
+      ],
+      total: 9.50,
+      assignedRider: "rider2"
+    },
+    {
+      id: "ORD003",
+      status: "In Progress",
+      currentStatus: "pending",
+      orderedAt: "9:45 AM",
+      customerName: "Alice Johnson",
+      phone: "+1-555-3003",
+      address: "789 Pine St, Midtown, City 54321",
+      items: [
+        { name: "Espresso", quantity: 3, price: 9.00 },
+        { name: "Blueberry Scone", quantity: 1, price: 3.00 }
+      ],
+      total: 12.00,
+      assignedRider: "rider1"
+    }
+  ]);
 
   const riders = {
     rider1: {
       name: "Rider 1",
       phone: "+1-555-1111",
-      activeOrders: 0,
+      activeOrders: 3,
       imageUrl: "https://via.placeholder.com/50"
     },
     rider2: {
       name: "Rider 2",
       phone: "+1-555-2222",
-      activeOrders: 0,
+      activeOrders: 2,
       imageUrl: "https://via.placeholder.com/50"
     },
     rider3: {
       name: "Rider 3",
       phone: "+1-555-3333",
-      activeOrders: 0,
+      activeOrders: 1,
       imageUrl: "https://via.placeholder.com/50"
     },
     rider4: {
@@ -65,53 +112,25 @@ function RiderDashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  // Load orders from localStorage on component mount
-  useEffect(() => {
-    const loadOrdersFromStorage = () => {
-      const savedOrders = localStorage.getItem('deliveryOrders');
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders));
-      } else {
-        setOrders([]);
-      }
-    };
-
-    loadOrdersFromStorage();
-
-    const handleStorageChange = (e) => {
-      if (e.key === 'deliveryOrders') {
-        loadOrdersFromStorage();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
   const currentDateFormatted = currentDate.toLocaleString("en-US", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
     hour: "numeric", minute: "numeric", second: "numeric",
   });
 
   const handleRiderChange = (orderId, newRider) => {
-    const updatedOrders = orders.map(order =>
-      order.id === orderId ? { ...order, assignedRider: newRider } : order
+    setOrders(prevOrders =>
+      prevOrders.map(order =>
+        order.id === orderId ? { ...order, assignedRider: newRider } : order
+      )
     );
-    
-    setOrders(updatedOrders);
-    localStorage.setItem('deliveryOrders', JSON.stringify(updatedOrders));
   };
 
   const handleStatusChange = (orderId, newStatus) => {
-    const updatedOrders = orders.map(order =>
-      order.id === orderId ? { ...order, currentStatus: newStatus } : order
+    setOrders(prevOrders =>
+      prevOrders.map(order =>
+        order.id === orderId ? { ...order, currentStatus: newStatus } : order
+      )
     );
-    
-    setOrders(updatedOrders);
-    localStorage.setItem('deliveryOrders', JSON.stringify(updatedOrders));
   };
 
   const getStatusStyle = (status) => {
@@ -181,36 +200,37 @@ function RiderDashboard() {
                 setRiderFilter(e.target.value);
               }}
             >
-              {Object.keys(riders).map(riderKey => (
-                <option key={riderKey} value={riderKey}>{riders[riderKey].name}</option>
-              ))}
+              <option value="rider1">Rider 1</option>
+              <option value="rider2">Rider 2</option>
+              <option value="rider3">Rider 3</option>
+              <option value="rider4">Rider 4</option>
+              <option value="rider5">Rider 5</option>
+              <option value="rider6">Rider 6</option>
             </select>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-around", gap: "20px", flexWrap: "wrap" }}>
-            <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", backgroundColor: "white", color: "#4b929d", borderRadius: "8px" }}>
-              <FaBoxOpen size={32} color="#964b00" />
-              <span style={{ fontSize: "1rem", fontWeight: "400" }}>Active Orders</span>
-              <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>
-                {orders.filter(order => order.assignedRider === selectedRider && 
-                  !["delivered", "cancelled", "returned"].includes(order.currentStatus)).length} orders
-              </span>
-            </Card>
-            <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", backgroundColor: "white", color: "#4b929d", borderRadius: "8px" }}>
-              <FaCheckCircle size={32} color="#198754" />
-              <span style={{ fontSize: "1rem", fontWeight: "400" }}>Completed</span>
-              <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>
-                {orders.filter(order => order.assignedRider === selectedRider && order.currentStatus === "delivered").length} orders
-              </span>
-            </Card>
-            <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", backgroundColor: "white", color: "#4b929d", borderRadius: "8px" }}>
-              <FaDollarSign size={32} color="#fd7e14" />
-              <span style={{ fontSize: "1rem", fontWeight: "400" }}>Earnings</span>
-              <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>
-                ₱{orders.filter(order => order.assignedRider === selectedRider && order.currentStatus === "delivered")
-                  .reduce((sum, order) => sum + (order.total || 0), 0).toFixed(2)}
-              </span>
-            </Card>
-          </div>
+    <div style={{ display: "flex", justifyContent: "space-around", gap: "20px", flexWrap: "wrap" }}>
+      <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", backgroundColor: "white", color: "#4b929d", borderRadius: "8px" }}>
+        <FaBoxOpen size={32} color="#964b00" />
+        <span style={{ fontSize: "1rem", fontWeight: "400" }}>Active Orders</span>
+        <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>
+          {orders.filter(order => order.assignedRider === selectedRider && order.currentStatus !== "delivered" && order.currentStatus !== "cancelled" && order.currentStatus !== "returned").length} orders
+        </span>
+      </Card>
+      <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", backgroundColor: "white", color: "#4b929d", borderRadius: "8px" }}>
+        <FaCheckCircle size={32} color="#198754" />
+        <span style={{ fontSize: "1rem", fontWeight: "400" }}>Completed</span>
+        <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>
+          {orders.filter(order => order.assignedRider === selectedRider && order.currentStatus === "delivered").length} orders
+        </span>
+      </Card>
+      <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", backgroundColor: "white", color: "#4b929d", borderRadius: "8px" }}>
+        <FaDollarSign size={32} color="#fd7e14" />
+        <span style={{ fontSize: "1rem", fontWeight: "400" }}>Earnings</span>
+        <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>
+          ₱{orders.filter(order => order.assignedRider === selectedRider && order.currentStatus === "delivered").reduce((sum, order) => sum + order.total, 0).toFixed(2)}
+        </span>
+      </Card>
+    </div>
         </Container>
         <div style={{ display: "flex", justifyContent: "flex-start", marginTop: "20px" }}>
           <button
@@ -224,6 +244,7 @@ function RiderDashboard() {
               color: toggle === "active" ? "white" : "#4b929d"
             }}
             onClick={() => setToggle("active")}
+            className={toggle === "active" ? "active-toggle" : ""}
           >
             Active Orders
           </button>
@@ -238,6 +259,7 @@ function RiderDashboard() {
               color: toggle === "all" ? "white" : "#4b929d"
             }}
             onClick={() => setToggle("all")}
+            className={toggle === "all" ? "active-toggle" : ""}
           >
             All Orders
           </button>
@@ -251,6 +273,7 @@ function RiderDashboard() {
               color: toggle === "completed" ? "white" : "#4b929d"
             }}
             onClick={() => setToggle("completed")}
+            className={toggle === "completed" ? "active-toggle" : ""}
           >
             Completed
           </button>
@@ -259,7 +282,8 @@ function RiderDashboard() {
           {toggle === "active" && <div>Showing Active Orders</div>}
           {toggle === "all" && <div>Showing All Orders</div>}
           {toggle === "completed" && <div>Showing Completed Orders</div>}
-         </div>
+        </div>
+        {toggle === "active" && (
          <div style={{
   display: "flex",
   gap: "20px",
@@ -350,7 +374,9 @@ function RiderDashboard() {
         </div>
       </Card>
     ))}
-</div>
+
+          </div>
+        )}
       </div>
     </div>
   );
