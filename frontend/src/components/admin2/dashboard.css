@@ -289,6 +289,10 @@ body {
 .card.orders .card-icon { background: #20c997; }
 .card.pendings .card-icon { background: #fd7e14; }
 
+.card.deliveredOrders .card-icon { background: #17a2b8; } /* info blue */
+.card.inPreparation .card-icon { background: #6c757d; } /* secondary gray */
+.card.confirmedOrders .card-icon { background: #6610f2; } /* purple */
+
 .card-text {
   flex: 1;
   align-self: start;
@@ -387,7 +391,7 @@ body {
   }
 
   .dashboard-cards {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, 1fr);
   }
 }
 

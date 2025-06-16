@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from "react";
+import coffeeImage from "../../assets/coffee.jpg";
 import "../admin2/dashboard.css";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faMoneyBillWave,
   faChartLine,
   faShoppingCart,
   faClock,
   faArrowTrendUp,
-  faArrowTrendDown
+  faArrowTrendDown,
+  faCheckCircle,
+  faCog,
+  faClipboardCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { FaChevronDown, FaBell } from "react-icons/fa";
+
+library.add(faMoneyBillWave, faChartLine, faShoppingCart, faClock, faArrowTrendUp, faArrowTrendDown, faCheckCircle, faCog, faClipboardCheck);
 
 const revenueData = [
   { name: 'Jan', income: 5000, expense: 3000 },
@@ -76,10 +83,34 @@ const data = [
   {
     title: "Pending Orders",
     current: 5,
-    previous: 5,
+    previous: 5 ,
     format: "number",
     icon: faClock,
     type: "pendings"
+  },
+  {
+    title: "Delivered Orders",
+    current: 5,
+    previous: 5,
+    format: "number",
+    icon: faCheckCircle,
+    type: "deliveredOrders"
+  },
+  {
+    title: "In Preparation",
+    current: 8,
+    previous: 6,
+    format: "number",
+    icon: faCog,
+    type: "inPreparation"
+  },
+  {
+    title: "Confirmed Orders",
+    current: 20,
+    previous: 18,
+    format: "number",
+    icon: faClipboardCheck,
+    type: "confirmedOrders"
   }
 ];
 
@@ -138,7 +169,7 @@ const Dashboard = () => {
         </header>
 
         <div className="dashboard-contents">
-          <div className="dashboard-cards">
+          <div className="dashboard-cards" style={{ display: 'flex', gap: '20px', flexWrap: 'nowrap' }}>
             {data.map((card, index) => {
               const { current, previous } = card;
               const diff = current - previous;
@@ -147,7 +178,7 @@ const Dashboard = () => {
               const hasChange = current !== previous;
 
               return (
-                <div key={index} className={`card ${card.type}`}>
+                <div key={index} className={`card ${card.type}`} style={{ flex: 1 }}>
                   <div className="card-text">
                     <div className="card-title">{card.title}</div>
                     <div className="card-details">
@@ -231,6 +262,132 @@ const Dashboard = () => {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* New cards below the graphs */}
+          <div className="dashboard-extra-cards" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+            <div className="chart-box" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', padding: '20px' }}>
+              <div style={{ fontSize: '22px', fontWeight: '700', marginBottom: '5px' }}>Recent Orders</div>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>Latest orders from customers</div>
+              {/* Additional content for recent orders can be added here */}
+              <div style={{ width: '100%', marginTop: '10px' }}>
+                <div style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', padding: '10px', marginBottom: '10px', width: '100%' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontWeight: '700' }}>#1001</div>
+                    <div style={{
+                      fontWeight: '600',
+                      color: '#d39e00',
+                      backgroundColor: '#fff3cd',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      minWidth: '70px',
+                      textAlign: 'center'
+                    }}>
+                      pending
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '16px', marginTop: '5px' }}>John Customer</div>
+                  <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '5px' }}>10:32 PM • pickup • $10.75</div>
+                </div>
+                <div style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', padding: '10px', width: '100%' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontWeight: '700' }}>#1002</div>
+                    <div style={{
+                      fontWeight: '600',
+                      color: '#d39e00',
+                      backgroundColor: '#fff3cd',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      minWidth: '70px',
+                      textAlign: 'center'
+                    }}>
+                      pending
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '16px', marginTop: '5px' }}>lim Customer</div>
+                  <div style={{ fontSize: '12px', color: '#6c757d', marginTop: '5px' }}>10:32 PM • pickup • $10.75</div>
+                </div>
+                <button style={{ marginTop: '15px', padding: '8px 16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+                  View More
+                </button>
+              </div>
+            </div>
+            <div className="chart-box" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', padding: '20px' }}>
+              <div style={{ fontSize: '22px', fontWeight: '700', marginBottom: '5px' }}>Popular Items</div>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>Best selling menu items</div>
+              {/* Additional content for popular items can be added here */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: '10px', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ 
+                        fontWeight: '700', 
+                        color: '#007bff', 
+                        backgroundColor: '#d0e7ff', 
+                        borderRadius: '50%', 
+                        width: '30px', 
+                        height: '30px', 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        fontSize: '16px'
+                      }}>#1</div>
+                      <img src={coffeeImage} alt="Spanish Coffee" style={{ width: '60px', height: '60px', borderRadius: '6px', objectFit: 'cover' }} />
+                      <div style={{ fontSize: '16px' }}>Spanish Coffee</div>
+                    </div>
+                    <div style={{ justifySelf: 'end', width: '100px', height: '10px', backgroundColor: '#e0e0e0', borderRadius: '5px', overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ width: '95%', height: '100%', backgroundColor: '#007bff' }}></div>
+                      <div style={{ position: 'absolute', top: '-18px', right: '0', fontSize: '12px', fontWeight: '600', color: '#007bff' }}>95%</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: '10px', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ 
+                        fontWeight: '700', 
+                        color: '#6f42c1', 
+                        backgroundColor: '#e0d7ff', 
+                        borderRadius: '50%', 
+                        width: '30px', 
+                        height: '30px', 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        fontSize: '16px'
+                      }}>#2</div>
+                      <img src={coffeeImage} alt="Caramel Macchiato" style={{ width: '60px', height: '60px', borderRadius: '6px', objectFit: 'cover' }} />
+                      <div style={{ fontSize: '16px' }}>Caramel Macchiato</div>
+                    </div>
+                    <div style={{ justifySelf: 'end', width: '100px', height: '10px', backgroundColor: '#e0e0e0', borderRadius: '5px', overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ width: '85%', height: '100%', backgroundColor: '#6f42c1' }}></div>
+                      <div style={{ position: 'absolute', top: '-18px', right: '0', fontSize: '12px', fontWeight: '600', color: '#6f42c1' }}>85%</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: '10px', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ 
+                        fontWeight: '700', 
+                        color: '#fd7e14', 
+                        backgroundColor: '#fff4e5', 
+                        borderRadius: '50%', 
+                        width: '30px', 
+                        height: '30px', 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        fontSize: '16px'
+                      }}>#3</div>
+                      <img src={coffeeImage} alt="Mocha Latte" style={{ width: '60px', height: '60px', borderRadius: '6px', objectFit: 'cover' }} />
+                      <div style={{ fontSize: '16px' }}>Mocha Latte</div>
+                    </div>
+                    <div style={{ justifySelf: 'end', width: '100px', height: '10px', backgroundColor: '#e0e0e0', borderRadius: '5px', overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ width: '75%', height: '100%', backgroundColor: '#fd7e14' }}></div>
+                      <div style={{ position: 'absolute', top: '-18px', right: '0', fontSize: '12px', fontWeight: '600', color: '#fd7e14' }}>75%</div>
+                    </div>
+                  </div>
+<button style={{ width: '120px', padding: '8px 16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+                  View More
+                </button>
+                </div>
             </div>
           </div>
         </div>

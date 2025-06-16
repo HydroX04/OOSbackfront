@@ -7,7 +7,7 @@ import logo from '../../assets/logo.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBars, faHome, faUtensils, faUserFriends,
-  faBox, faCarrot, faCoffee, faTshirt, faEnvelope, faTruck, faMotorcycle
+  faBox, faCarrot, faCoffee, faTshirt, faEnvelope, faTruck, faMotorcycle, faChartBar
 } from '@fortawesome/free-solid-svg-icons';
 
 function SidebarComponent() {
@@ -55,11 +55,11 @@ function SidebarComponent() {
               Rider Dashboard
             </MenuItem>
             <MenuItem
-              icon={<FontAwesomeIcon icon={faEnvelope} />}
-              component={<Link to="/admin/inbox" />}
-              active={location.pathname === '/admin/inbox'}
+              icon={<FontAwesomeIcon icon={faChartBar} />}
+              component={<Link to="/admin/report" />}
+              active={location.pathname === '/admin/report'}
             >
-              Inbox
+              Reports
             </MenuItem>
 
             
