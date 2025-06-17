@@ -71,6 +71,10 @@ const OrderHistory = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
 
+  // New state for invoice modal
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [orderToView, setOrderToView] = useState(null);
+
   const filteredOrders = (orders) => {
     return orders.filter(
       (order) =>
@@ -170,7 +174,10 @@ const OrderHistory = () => {
                   {index === 0 && <td rowSpan={order.products.length}>{getStatusBadge(order.status)}</td>}
                   {index === 0 && (
                     <td rowSpan={order.products.length}>
-                      <button className="action-btn view" title="View">
+                      <button className="action-btn view" title="View" onClick={() => {
+                        setOrderToView(order);
+                        setShowInvoiceModal(true);
+                      }}>
                         <EyeFill />
                       </button>
                       {activeTab === 'pending' && (
@@ -256,6 +263,49 @@ const OrderHistory = () => {
           </Button>
           <Button variant="danger" onClick={handleConfirmCancel}>
             Yes, Cancel Order
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Invoice Modal */}
+      <Modal show={showInvoiceModal} onHide={() => setShowInvoiceModal(false)} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Invoice for Order #{orderToView ? orderToView.id : ''}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {orderToView ? (
+            <div>
+              <p><strong>Date:</strong> {orderToView.date}</p>
+              <p><strong>Order Type:</strong> {orderToView.orderType}</p>
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price (₱)</th>
+                    <th>Subtotal (₱)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orderToView.products.map((product) => (
+                    <tr key={product.id}>
+                      <td>{product.name}</td>
+                      <td>{product.quantity}</td>
+                      <td>{product.price.toFixed(2)}</td>
+                      <td>{(product.price * product.quantity).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              <h5>Total: ₱{orderToView.total.toFixed(2)}</h5>
+            </div>
+          ) : (
+            <p>No order selected.</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowInvoiceModal(false)}>
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

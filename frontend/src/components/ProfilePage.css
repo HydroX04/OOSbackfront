@@ -82,9 +82,13 @@
 
 .form-label {
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.25rem !important;
   font-size: 0.9rem;
   color: #212529;
+}
+
+#blockStreetSubdivision.form-label {
+  margin-bottom: 0.1rem !important;
 }
 
 .form-input {
@@ -95,6 +99,10 @@
   margin-bottom: 1rem;
   width: 100%;
   box-sizing: border-box;
+}
+
+.block-street-subdivision-input {
+  margin-bottom: 1px;
 }
 
 #firstName.form-input,
@@ -109,7 +117,11 @@
 .form-row {
   display: flex;
   gap: 1rem;
- 
+  margin-bottom: -10px;
+}
+
+.form-row.city-province-row {
+  margin-bottom:-20px;
 }
 
 .form-group {

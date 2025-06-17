@@ -163,4 +163,93 @@
   margin-top: -30px;
 }
 
+/* Custom modal invoice styles */
+.custom-modal-dialog {
+  max-width: 800px;
+}
+
+.custom-modal-content {
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #212529;
+}
+
+.custom-modal-header {
+  border-bottom: 2px solid #dee2e6;
+  background-color: #f8f9fa;
+  padding: 15px 20px;
+}
+
+.custom-modal-title {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #343a40;
+}
+
+.custom-modal-body {
+  padding: 20px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.invoice-modal-body h5,
+.invoice-modal-body h6 {
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+}
+
+.invoice-section {
+  margin-bottom: 20px;
+}
+
+.invoice-section div,
+.invoice-section ul {
+  margin-left: 15px;
+}
+
+.invoice-section ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.invoice-section ul li {
+  padding: 4px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.invoice-section ul li:last-child {
+  border-bottom: none;
+}
+
+.table-bordered {
+  border: 1px solid #dee2e6;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid #dee2e6;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.text-end {
+  text-align: right;
+}
+
+.fw-bold {
+  font-weight: 700;
+}
+
+.custom-modal-footer {
+  border-top: 2px solid #dee2e6;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  text-align: right;
+}
+
 

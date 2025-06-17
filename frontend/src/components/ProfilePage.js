@@ -10,12 +10,15 @@ const ProfilePage = () => {
     const username = form.username.value.trim();
     const firstName = form.firstName.value.trim();
     const lastName = form.lastName.value.trim();
-    const address = form.address.value.trim();
+    const blockStreetSubdivision = form.blockStreetSubdivision.value.trim();
+    const city = form.city.value.trim();
+    const province = form.province.value.trim();
+    const landmark = form.landmark.value.trim();
     const email = form.email.value.trim();
     const phone = form.phone.value.trim();
     const birthday = form.birthday.value.trim();
 
-    if (!username || !firstName || !lastName || !address || !email || !phone || !birthday) {
+    if (!username || !firstName || !lastName || !blockStreetSubdivision || !city || !province || !landmark || !email || !phone || !birthday) {
       toast.error('Please fill in all required fields.');
       return;
     }
@@ -98,14 +101,50 @@ const ProfilePage = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="address" className="form-label">Address</label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            placeholder="Address"
-            className="form-input"
-          />
+              <label htmlFor="blockStreetSubdivision" className="form-label">Block, Street, Subdivision *</label>
+              <input
+                type="text"
+                id="blockStreetSubdivision"
+                name="blockStreetSubdivision"
+                placeholder="Block, Street, Subdivision"
+                className="form-input block-street-subdivision-input"
+              />
+            </div>
+          </div>
+
+          <div className="form-row city-province-row">
+            <div className="form-group city-group">
+              <label htmlFor="city" className="form-label">City *</label>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                placeholder="City"
+                className="form-input"
+              />
+            </div>
+            <div className="form-group province-group">
+              <label htmlFor="province" className="form-label">Province *</label>
+              <input
+                type="text"
+                id="province"
+                name="province"
+                placeholder="Province"
+                className="form-input"
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="landmark" className="form-label">Landmark *</label>
+              <input
+                type="text"
+                id="landmark"
+                name="landmark"
+                placeholder="Landmark"
+                className="form-input"
+              />
             </div>
           </div>
 

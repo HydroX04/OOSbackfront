@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronDown, FaBell } from 'react-icons/fa';
+import { FaChevronDown, FaBell, FaAngleLeft, FaAngleRight, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
+import { Form } from 'react-bootstrap';
 
+import './report.css';
 
 import coffeeImage from "../../assets/coffee.jpg";
-import "../admin2/dashboard.css";
+  
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   AreaChart, Area
@@ -17,28 +19,135 @@ import {
   faClock,
   faArrowTrendUp,
   faArrowTrendDown,
-  faCheckCircle,
   faCog,
-  faClipboardCheck
+  faClipboardCheck,
+  faDollarSign,
+  faClipboardList,
+  faChartPie,
+  faCheckCircle,
+  faSearch
 } from '@fortawesome/free-solid-svg-icons';
 
 const data = [
   {
-    title: "Sample Data 1",
-    current: 100,
-    previous: 90,
-    format: "number",
-    icon: faMoneyBillWave,
-    type: "sample1"
+    title: "Total Revenue",
+    current: 500000,
+    previous: 450000,
+    format: "currency",
+    icon: faDollarSign,
+    type: "revenue"
   },
   {
-    title: "Sample Data 2",
-    current: 200,
-    previous: 180,
+    title: "Total Orders",
+    current: 1200,
+    previous: 1100,
     format: "number",
-    icon: faChartLine,
-    type: "sample2"
+    icon: faClipboardList,
+    type: "orders"
+  },
+  {
+    title: "Avg Order Value",
+    current: 420,
+    previous: 400,
+    format: "currency",
+    icon: faChartPie,
+    type: "avgOrderValue"
+  },
+  {
+    title: "Completion Rate",
+    current: 95,
+    previous: 92,
+    format: "number",
+    icon: faCheckCircle,
+    type: "completionRate"
   }
+];
+
+const sampleTableData = [
+  {
+    date: '2024-06-01',
+    orderId: 'ORD12345',
+    customerName: 'John Doe',
+    orderStatus: 'Completed',
+    paymentMethod: 'GCash',
+    timeOrdered: '10:30 AM',
+    totalAmount: 1500,
+    itemsOrdered: 'Coffee, Muffin',
+    orderType: 'Dine-in',
+    handledBy: 'Admin1'
+  },
+  {
+    date: '2024-06-02',
+    orderId: 'ORD12346',
+    customerName: 'Jane Smith',
+    orderStatus: 'Pending',
+    paymentMethod: 'COD',
+    timeOrdered: '11:00 AM',
+    totalAmount: 800,
+    itemsOrdered: 'Latte',
+    orderType: 'Takeout',
+    handledBy: 'Admin2'
+  },
+  {
+    date: '2024-06-02',
+    orderId: 'ORD12347',
+    customerName: 'Alice Johnson',
+    orderStatus: 'Cancelled',
+    paymentMethod: 'Credit Card',
+    timeOrdered: '09:45 AM',
+    totalAmount: 0,
+    itemsOrdered: 'Espresso',
+    orderType: 'Delivery',
+    handledBy: 'Admin1'
+  },
+  {
+    date: '2024-06-03',
+    orderId: 'ORD12348',
+    customerName: 'Bob Brown',
+    orderStatus: 'Completed',
+    paymentMethod: 'GCash',
+    timeOrdered: '02:15 PM',
+    totalAmount: 1200,
+    itemsOrdered: 'Cappuccino, Sandwich',
+    orderType: 'Dine-in',
+    handledBy: 'Admin1'
+  },
+  {
+    date: '2024-06-04',
+    orderId: 'ORD12349',
+    customerName: 'Charlie Davis',
+    orderStatus: 'Completed',
+    paymentMethod: 'Credit Card',
+    timeOrdered: '03:30 PM',
+    totalAmount: 950,
+    itemsOrdered: 'Tea, Cookie',
+    orderType: 'Takeout',
+    handledBy: 'Admin2'
+  },
+  {
+    date: '2024-06-05',
+    orderId: 'ORD12350',
+    customerName: 'Diana Evans',
+    orderStatus: 'Pending',
+    paymentMethod: 'COD',
+    timeOrdered: '10:00 AM',
+    totalAmount: 650,
+    itemsOrdered: 'Americano',
+    orderType: 'Delivery',
+    handledBy: 'Admin1'
+  },
+  {
+    date: '2024-06-05',
+    orderId: 'ORD12351',
+    customerName: 'Ethan Foster',
+    orderStatus: 'Completed',
+    paymentMethod: 'GCash',
+    timeOrdered: '11:45 AM',
+    totalAmount: 1800,
+    itemsOrdered: 'Latte, Croissant, Muffin',
+    orderType: 'Dine-in',
+    handledBy: 'Admin2'
+  },
 ];
 
 const formatValue = (value, format) => {
@@ -49,9 +158,45 @@ const formatValue = (value, format) => {
 
 const Report = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+  const [searchTerm, setSearchTerm] = useState("");
 
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
+  };
+
+  // Filter data based on search term
+  const filteredData = sampleTableData.filter(row => 
+    row.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.orderStatus.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.orderType.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination calculations
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const handleFirstPage = () => {
+    setCurrentPage(1);
+  };
+
+  const handleLastPage = () => {
+    setCurrentPage(totalPages);
   };
 
   return (
@@ -119,8 +264,124 @@ const Report = () => {
             })}
           </div>
 
-          {/* Additional content can be added here */}
+          <div className="table-container" style={{ marginTop: '30px' }}>
+            <div className="table-header d-flex justify-content-between align-items-center">
+              <h5 style={{ color: "#4a9ba5", margin: 0 }}>Reports</h5>
+              <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                <div className="filter-date-range" style={{ display: 'flex', alignItems: 'center' }}>
+                  <label htmlFor="startDate" style={{ marginRight: '8px', fontWeight: 'bold' }}>From:</label>
+                  <Form.Control type="date" id="startDate" name="startDate" style={{ padding: '6px 12px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#f9f9f9', cursor: 'pointer', marginRight: '10px', width: '150px' }} />
+                  <label htmlFor="endDate" style={{ marginRight: '8px', fontWeight: 'bold' }}>To:</label>
+                  <Form.Control type="date" id="endDate" name="endDate" style={{ padding: '6px 12px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#f9f9f9', cursor: 'pointer', width: '150px' }} />
+                </div>
+                <div className="filter-dropdown" style={{ display: 'flex', alignItems: 'center' }}>
+                  <label htmlFor="filterStatus" style={{ marginRight: '8px', fontWeight: 'bold' }}>Filter by:</label>
+                  <Form.Select id="filterStatus" name="filterStatus" style={{ padding: '6px 12px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#f9f9f9', cursor: 'pointer', width: '150px' }}>
+                    <option value="">All Status</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </Form.Select>
+                </div>
+                <div className="export-dropdown" style={{ display: 'flex', alignItems: 'center' }}>
+                  <Form.Select id="exportOptions" name="exportOptions" style={{ padding: '6px 12px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#f9f9f9', cursor: 'pointer', width: '150px' }}>
+                    <option value="csv">Export CSV</option>
+                    <option value="pdf">Export PDF</option>
+                  </Form.Select>
+                </div>
+              </div>
+            </div>
+            <table className="orders-table" style={{ width: "100%" }}>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Order ID</th>
+                  <th>Customer Name</th>
+                  <th>Order Status</th>
+                  <th>Payment Method</th>
+                  <th>Time Ordered</th>
+                  <th >Total Amount (₱)</th>
+                  <th>Items Ordered</th>
+                  <th>Order Type</th>
+                  <th>Handled By</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentRows.length > 0 ? (
+                  currentRows.map((row, index) => (
+                    <tr key={index}>
+                      <td>{row.date}</td>
+                      <td>{row.orderId}</td>
+                      <td>{row.customerName}</td>
+                      <td>
+                        <span className={`status-${row.orderStatus.toLowerCase()}`}>{row.orderStatus}</span>
+                      </td>
+                      <td>{row.paymentMethod}</td>
+                      <td>{row.timeOrdered}</td>
+                      <td style={{ textAlign: "left" }}>₱{row.totalAmount.toLocaleString()}</td>
+                      <td>{row.itemsOrdered}</td>
+                      <td>{row.orderType}</td>
+                      <td>{row.handledBy}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="10" className="text-center">No reports found</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
 
+            {/* Pagination Controls */}
+            {filteredData.length > rowsPerPage && (
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                  Showing {indexOfFirstRow + 1} to {Math.min(indexOfLastRow, filteredData.length)} of {filteredData.length} entries
+                </div>
+                <div className="d-flex align-items-center">
+                  <button 
+                    className="pagination-btn" 
+                    onClick={handleFirstPage} 
+                    disabled={currentPage === 1}
+                  >
+                    <FaAngleDoubleLeft />
+                  </button>
+                  <button 
+                    className="pagination-btn" 
+                    onClick={handlePrevPage} 
+                    disabled={currentPage === 1}
+                  >
+                    <FaAngleLeft />
+                  </button>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                    <button
+                      key={number}
+                      className={`pagination-btn ${currentPage === number ? 'active' : ''}`}
+                      onClick={() => paginate(number)}
+                    >
+                      {number}
+                    </button>
+                  ))}
+                  
+                  <button 
+                    className="pagination-btn" 
+                    onClick={handleNextPage} 
+                    disabled={currentPage === totalPages}
+                  >
+                    <FaAngleRight />
+                  </button>
+                  <button 
+                    className="pagination-btn" 
+                    onClick={handleLastPage} 
+                    disabled={currentPage === totalPages}
+                  >
+                    <FaAngleDoubleRight />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>
