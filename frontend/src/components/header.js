@@ -9,16 +9,37 @@ import cartIcon from '../assets/cart.svg';
 import bellIcon from '../assets/bell.svg';
 import './header.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useContext, useState } from 'react';
-import { AuthContext } from './AuthContext';
+import { useEffect, useState } from 'react';
 
 export default function AppHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
 
-  const { isLoggedIn, logout } = useContext(AuthContext);
+  // Remove AuthContext usage, use local state for login detection
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // Check URL query params for authorization token and store in localStorage
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tokenFromUrl = params.get('authorization');
+    console.log('Token from URL:', tokenFromUrl);
+    if (tokenFromUrl) {
+      localStorage.setItem('authToken', tokenFromUrl);
+      setIsLoggedIn(true);
+      console.log('Set isLoggedIn to true');
+      // Remove token from URL to clean up
+      params.delete('authorization');
+      const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, document.title, newUrl);
+    } else {
+      const token = localStorage.getItem('authToken');
+      console.log('Token from localStorage:', token);
+      setIsLoggedIn(!!token);
+      console.log('Set isLoggedIn to', !!token);
+    }
+  }, []);
 
   // New state for header visibility
   const [isVisible, setIsVisible] = useState(true);
@@ -129,8 +150,10 @@ export default function AppHeader() {
 
   const confirmLogout = () => {
     setShowLogoutModal(false);
-    logout();
-    navigate('/login');
+    localStorage.removeItem('authToken');
+    setIsLoggedIn(false);
+    // Redirect to login page on frontend-auth at localhost:4002
+    window.location.href = 'http://localhost:4002/';
   };
 
   const cancelLogout = () => {
