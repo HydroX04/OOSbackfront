@@ -176,7 +176,7 @@ const MenuContent = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <div className="item-image-placeholder">
-                  {item.ProductImage ? <img src={`http://localhost:8001${item.ProductImage}`} alt={item.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'Image'}
+{item.ProductImage ? <img src={item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`} alt={item.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'Image'}
                 </div>
                 <div className="item-name-placeholder">{item.ProductName}</div>
               </div>
@@ -196,11 +196,11 @@ const MenuContent = () => {
                   <div className="col-md-6">
                     <div className="modal-image-placeholder">
                       <div className="d-flex align-items-center justify-content-center h-100 bg-light">
-                          {selectedItem.ProductImage ? (
-                          <img src={`http://localhost:8001${selectedItem.ProductImage}`} alt={selectedItem.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <span className="text-muted">Item Image</span>
-                        )}
+{selectedItem.ProductImage ? (
+  <img src={selectedItem.ProductImage.startsWith('http') ? selectedItem.ProductImage : `http://localhost:8001${selectedItem.ProductImage}`} alt={selectedItem.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+) : (
+  <span className="text-muted">Item Image</span>
+)}
                       </div>
                     </div>
                   </div>
