@@ -130,7 +130,7 @@ const LoginPage = () => {
           // admin ims navigation
           if (userRole === 'admin' && userSystem === 'IMS') {
             
-            const targetUrl = new URL('http://localhost:3000/admin/dashboard');
+            const targetUrl = new URL('http://localhost:3001/admin/dashboard');
             targetUrl.searchParams.append('username', trimmedUsername);
             targetUrl.searchParams.append('authorization', access_token);
             window.location.href = targetUrl.toString();
@@ -153,16 +153,10 @@ const LoginPage = () => {
               }
             });
           } 
-          else {
-            // MODIFICATION: Default navigation for other users, also passing state.
-            navigate('/', { 
-              replace: true, 
-              state: { 
-                username: trimmedUsername, 
-                authorization: access_token 
-              }
-            });
-          }
+            else {
+              // MODIFICATION: Default navigation for other users, also passing state.
+              window.location.href = 'http://localhost:3001/';
+            }
         }, 1000); 
       } else if (response.status === 401) {
         setFailedAttempts((prev) => {
@@ -180,7 +174,7 @@ const LoginPage = () => {
         });
       } else if (response.status === 403) {
         try {
-          const lockoutResponse = await fetch(`http://127.0.0.1:8000/lockout-status?username=${encodeURIComponent(trimmedUsername)}`);
+          const lockoutResponse = await fetch(`http://127.0.0.1:4000/lockout-status?username=${encodeURIComponent(trimmedUsername)}`);
           if (lockoutResponse.ok) {
             const lockoutData = await lockoutResponse.json();
             setIsLockedOut(true);

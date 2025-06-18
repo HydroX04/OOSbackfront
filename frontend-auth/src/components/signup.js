@@ -241,7 +241,7 @@ const Signup = () => {
                     return;
                   }
                   try {
-                    const response = await fetch(`http://localhost:7000/check-username?username=${encodeURIComponent(username)}`);
+                    const response = await fetch(`http://localhost:4000/check-username?username=${encodeURIComponent(username)}`);
                     const data = await response.json();
                     if (!data.available) {
                       setUsernameError('Username already taken');

@@ -313,7 +313,7 @@ export default function AppHeader() {
                 )}
 
                 {!isLoggedIn ? (
-                  <Nav.Link as={Link} to="/login">
+                  <Nav.Link as={Link} to="http://localhost:4002">
                     <button className="btn btn-outline-primary">Sign In</button>
                   </Nav.Link>
                 ) : (

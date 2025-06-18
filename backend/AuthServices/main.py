@@ -19,11 +19,16 @@ app.include_router(users.router, prefix='/users', tags=['users'])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:3001",
-        "http://127.0.0.1:3001",
-        "http://192.168.100.10:3001",  # For network testinglocal 
+
+        "http://localhost:4002", # AUTH FRONTEND
+        "http://127.0.0.1:4002", # AUTH FRONTEND (localhost IP)
+        "http://localhost:4000", "http://127.0.0.1:4000", # Auth Service 
+
+        "http://localhost:3001", # OOS frontend
+        "http://127.0.0.1:3001", # OOS frontend (localhost IP)
+        "http://192.168.100.10:3001",  # For network testing local 
+        
         # Microservices - both localhost and 127.0.0.1 for reliability
-        "http://localhost:4000", "http://127.0.0.1:4000",  # Auth Service (PINALITAN KO NA ITO WAG NA GALAWIN)
         "http://localhost:7001", "http://127.0.0.1:7001",  # Delivery Service
         "http://localhost:7002", "http://127.0.0.1:7002",  # Menu Service
         "http://localhost:7003", "http://127.0.0.1:7003",  # Notification Service
