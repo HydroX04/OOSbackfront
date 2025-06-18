@@ -136,7 +136,7 @@ const LoginPage = () => {
             window.location.href = targetUrl.toString();
           }
           // staff navigation
-          if (userRole === 'staff' && userSystem === 'IMS') {
+          else if (userRole === 'staff' && userSystem === 'IMS') {
             const targetUrl = new URL('http://localhost:3000/staff/dashboard/');
             targetUrl.searchParams.append('username', trimmedUsername);
             targetUrl.searchParams.append('authorization', access_token);
