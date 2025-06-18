@@ -5,10 +5,55 @@ import riderImage from "../../assets/rider.jpg";
 import "../admin2/manageorder.css";
 import "./riderhome.css";
 
+const riders = {
+  rider1: {
+    name: "Rider 1",
+    phone: "+1-555-1111",
+    activeOrders: 3,
+    imageUrl: "https://via.placeholder.com/50"
+  },
+  rider2: {
+    name: "Rider 2",
+    phone: "+1-555-2222",
+    activeOrders: 2,
+    imageUrl: "https://via.placeholder.com/50"
+  },
+  rider3: {
+    name: "Rider 3",
+    phone: "+1-555-3333",
+    activeOrders: 1,
+    imageUrl: "https://via.placeholder.com/50"
+  },
+  rider4: {
+    name: "Rider 4",
+    phone: "+1-555-4444",
+    activeOrders: 0,
+    imageUrl: "https://via.placeholder.com/50"
+  },
+  rider5: {
+    name: "Rider 5",
+    phone: "+1-555-5555",
+    activeOrders: 0,
+    imageUrl: "https://via.placeholder.com/50"
+  },
+  rider6: {
+    name: "Rider 6",
+    phone: "+1-555-6666",
+    activeOrders: 0,
+    imageUrl: "https://via.placeholder.com/50"
+  }
+};
+
 function RiderHome() {
   const [orders, setOrders] = useState([]);
-  const [selectedRider, setSelectedRider] = useState("rider1");
   const [tabKey, setTabKey] = useState('active');
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [riderFilter, setRiderFilter] = useState("all");
+
+  // For testing: log orders to verify data
+  useEffect(() => {
+    console.log("Orders loaded:", orders);
+  }, [orders]);
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -39,7 +84,14 @@ function RiderHome() {
     const updatedOrders = orders.map(order =>
       order.id === orderId ? { ...order, currentStatus: newStatus } : order
     );
-    
+    setOrders(updatedOrders);
+    localStorage.setItem('deliveryOrders', JSON.stringify(updatedOrders));
+  };
+
+  const handleRiderChange = (orderId, newRider) => {
+    const updatedOrders = orders.map(order =>
+      order.id === orderId ? { ...order, assignedRider: newRider } : order
+    );
     setOrders(updatedOrders);
     localStorage.setItem('deliveryOrders', JSON.stringify(updatedOrders));
   };
@@ -50,7 +102,51 @@ function RiderHome() {
       if (savedOrders) {
         setOrders(JSON.parse(savedOrders));
       } else {
-        setOrders([]);
+        // Fallback sample orders for testing
+        setOrders([
+          {
+            id: "ORD001",
+            currentStatus: "pending",
+            orderedAt: "10:22 PM",
+            customerName: "John Smith",
+            phone: "+1-555-1001",
+            address: "123 Main St, Downtown, City 12345",
+            items: [
+              { name: "Cappuccino (Large)", quantity: 2, price: 11.00 },
+              { name: "Blueberry Muffin", quantity: 1, price: 3.25 }
+            ],
+            total: 14.25,
+            assignedRider: "rider1"
+          },
+          {
+            id: "ORD002",
+            currentStatus: "preparing",
+            orderedAt: "11:15 AM",
+            customerName: "Jane Doe",
+            phone: "+1-555-2002",
+            address: "456 Oak St, Uptown, City 67890",
+            items: [
+              { name: "Latte (Medium)", quantity: 1, price: 4.50 },
+              { name: "Chocolate Croissant", quantity: 2, price: 5.00 }
+            ],
+            total: 9.50,
+            assignedRider: "rider1"
+          },
+          {
+            id: "ORD003",
+            currentStatus: "delivered",
+            orderedAt: "9:45 AM",
+            customerName: "Alice Johnson",
+            phone: "+1-555-3003",
+            address: "789 Pine St, Midtown, City 54321",
+            items: [
+              { name: "Espresso", quantity: 3, price: 9.00 },
+              { name: "Blueberry Scone", quantity: 1, price: 3.00 }
+            ],
+            total: 12.00,
+            assignedRider: "rider1"
+          }
+        ]);
       }
     };
 
@@ -108,29 +204,23 @@ function RiderHome() {
           </Card>
         </div>
       </Container>
-      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
+      <div style={{ marginTop: "1px" }}>
         <Tabs
-          id="riderhome-tabs"
+          id="order-tabs"
           activeKey={tabKey}
           onSelect={(k) => setTabKey(k)}
           className="mb-3"
-          style={{ width: "100%", display: "flex", justifyContent: "center" }}
+          style={{ backgroundColor: "white", borderRadius: "8px", padding: "10px" }}
         >
-          <Tab eventKey="active" title="Active Deliveries" tabClassName="rider-tab" style={{ textAlign: "center" }}>
-            <div style={{
-              display: "flex",
-              gap: "20px",
-              marginTop: "20px",
-              justifyContent: "flex-start",
-              flexWrap: "wrap",
-              alignItems: "flex-start",
-              width: "100%"
-            }}>
-              {orders
-                .filter(order => order.assignedRider === "rider1")
-                .filter(order => !["delivered", "cancelled", "returned"].includes(order.currentStatus))
-                .map((order, idx) => (
-                  <Card key={idx} style={{ padding: "20px", textAlign: "left", display: "flex", flexDirection: "column", alignItems: "flex-start", width: "300px" }}>
+          <Tab eventKey="active" title="Active Orders">
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "flex-start" }}>
+              {orders.filter(order => order.assignedRider === "rider1" &&
+                !["delivered", "cancelled", "returned"].includes(order.currentStatus)).length === 0 ? (
+                <p>No active orders.</p>
+              ) : (
+                orders.filter(order => order.assignedRider === "rider1" &&
+                  !["delivered", "cancelled", "returned"].includes(order.currentStatus)).map(order => (
+                  <Card key={order.id} style={{ padding: "20px", textAlign: "left", display: "flex", flexDirection: "column", alignItems: "flex-start", width: "300px", marginBottom: "15px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                       <h5 style={{ color: "#4b929d" }}>Order #{order.id}</h5>
                       <p style={{
@@ -156,22 +246,12 @@ function RiderHome() {
                         }[order.currentStatus] || order.currentStatus}
                       </p>
                     </div>
-                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "gray" }}>
-                      <FaClock color="#4b929d" /> Ordered at {order.orderedAt}
-                    </p>
-                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}>
-                      <FaUser color="#4b929d" /> {order.customerName}
-                    </p>
-                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}>
-                      <FaPhone color="#4b929d" /> {order.phone.replace(/^\+1-/, "63")}
-                    </p>
-                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}>
-                      <FaMapMarkerAlt color="#4b929d" /> {order.address}
-                    </p>
-                    <p style={{ fontWeight: "600", marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}>
-                      <FaBox color="#4b929d" /> Items ({order.items?.length || 0})
-                    </p>
-                    {order.items?.map((item, i) => (
+                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "gray" }}><FaClock color="#4b929d" /> Ordered at {order.orderedAt}</p>
+                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}><FaUser color="#4b929d" /> {order.customerName}</p>
+                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}><FaPhone color="#4b929d" /> {order.phone.replace(/^\+1-/, "63")}</p>
+                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}><FaMapMarkerAlt color="#4b929d" /> {order.address}</p>
+                    <p style={{ fontWeight: "600", marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}><FaBox color="#4b929d" /> Items ({order.items.length})</p>
+                    {order.items.map((item, i) => (
                       <p key={i} style={{ marginBottom: "3px", alignSelf: "flex-start", color: "black", display: "flex", justifyContent: "space-between", width: "100%" }}>
                         <span>{item.quantity}x {item.name}</span>
                         <span style={{ marginLeft: "auto" }}>₱{item.price.toFixed(2)}</span>
@@ -180,9 +260,38 @@ function RiderHome() {
                     <hr style={{ alignSelf: "stretch" }} />
                     <p style={{ fontWeight: "600", marginBottom: "0", alignSelf: "flex-start", color: "black", display: "flex", justifyContent: "space-between", width: "100%" }}>
                       <span>Total</span>
-                      <span style={{ marginLeft: "auto" }}>₱{order.total?.toFixed(2) || "0.00"}</span>
+                      <span style={{ marginLeft: "auto" }}>₱{order.total.toFixed(2)}</span>
                     </p>
+                    {!order.assignedRider && (
+                      <p style={{ backgroundColor: "#fff3cd", padding: "8px", borderRadius: "4px", marginTop: "10px", color: "#856404", width: "100%" }}>
+                        Note: Please call when arrived
+                      </p>
+                    )}
+                    {order.assignedRider && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px", width: "100%", backgroundColor: "#f0f0f0", padding: "10px", borderRadius: "6px" }}>
+                        <img src={riderImage} alt={order.assignedRider} style={{ width: "50px", height: "50px", borderRadius: "50%" }} />
+                        <div>
+                          <div style={{ fontWeight: "600" }}>{order.assignedRider}</div>
+                          <div>{riders[order.assignedRider]?.phone}</div>
+                          <div>Active Orders: {riders[order.assignedRider]?.activeOrders}</div>
+                        </div>
+                      </div>
+                    )}
                     <div style={{ marginTop: "10px", width: "100%" }}>
+                      <label htmlFor={`assignRider-${order.id}`} style={{ fontWeight: "600", marginBottom: "5px", display: "block" }}>Assign Rider</label>
+                      <Form.Select
+                        id={`assignRider-${order.id}`}
+                        value={order.assignedRider || ""}
+                        onChange={(e) => handleRiderChange(order.id, e.target.value)}
+                      >
+                        <option value="">Select Rider</option>
+                        <option value="rider1">Rider 1</option>
+                        <option value="rider2">Rider 2</option>
+                        <option value="rider3">Rider 3</option>
+                        <option value="rider4">Rider 4</option>
+                        <option value="rider5">Rider 5</option>
+                        <option value="rider6">Rider 6</option>
+                      </Form.Select>
                       <label htmlFor={`orderStatus-${order.id}`} style={{ fontWeight: "600", marginBottom: "5px", display: "block", marginTop: "10px" }}>Order Status</label>
                       <Form.Select
                         id={`orderStatus-${order.id}`}
@@ -199,11 +308,107 @@ function RiderHome() {
                       </Form.Select>
                     </div>
                   </Card>
-                ))}
+                ))
+              )}
             </div>
           </Tab>
-          <Tab eventKey="completed" title="Completed" tabClassName="rider-tab" style={{ textAlign: "center" }}>
-            {/* Content for Completed can be added here */}
+          <Tab eventKey="completed" title="Completed">
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "flex-start" }}>
+              {orders.filter(order => order.assignedRider === "rider1" && order.currentStatus === "delivered").length === 0 ? (
+                <p>No completed orders.</p>
+              ) : (
+                orders.filter(order => order.assignedRider === "rider1" && order.currentStatus === "delivered").map(order => (
+                  <Card key={order.id} style={{ padding: "20px", textAlign: "left", display: "flex", flexDirection: "column", alignItems: "flex-start", width: "300px", marginBottom: "15px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                      <h5 style={{ color: "#4b929d" }}>Order #{order.id}</h5>
+                      <p style={{
+                        fontWeight: "600",
+                        marginBottom: "5px",
+                        color: getStatusStyle(order.currentStatus).color,
+                        backgroundColor: getStatusStyle(order.currentStatus).backgroundColor,
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        minWidth: "110px",
+                        textAlign: "center"
+                      }}>
+                        {{
+                          pending: "Pending",
+                          confirmed: "Confirmed",
+                          preparing: "Preparing",
+                          readyToPickup: "Ready to Pickup",
+                          pickedUp: "Picked Up",
+                          inTransit: "In transit",
+                          delivered: "Delivered",
+                          cancelled: "Cancelled",
+                          returned: "Cancelled/Returned"
+                        }[order.currentStatus] || order.currentStatus}
+                      </p>
+                    </div>
+                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "gray" }}><FaClock color="#4b929d" /> Ordered at {order.orderedAt}</p>
+                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}><FaUser color="#4b929d" /> {order.customerName}</p>
+                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}><FaPhone color="#4b929d" /> {order.phone.replace(/^\+1-/, "63")}</p>
+                    <p style={{ marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}><FaMapMarkerAlt color="#4b929d" /> {order.address}</p>
+                    <p style={{ fontWeight: "600", marginBottom: "5px", display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", color: "black" }}><FaBox color="#4b929d" /> Items ({order.items.length})</p>
+                    {order.items.map((item, i) => (
+                      <p key={i} style={{ marginBottom: "3px", alignSelf: "flex-start", color: "black", display: "flex", justifyContent: "space-between", width: "100%" }}>
+                        <span>{item.quantity}x {item.name}</span>
+                        <span style={{ marginLeft: "auto" }}>₱{item.price.toFixed(2)}</span>
+                      </p>
+                    ))}
+                    <hr style={{ alignSelf: "stretch" }} />
+                    <p style={{ fontWeight: "600", marginBottom: "0", alignSelf: "flex-start", color: "black", display: "flex", justifyContent: "space-between", width: "100%" }}>
+                      <span>Total</span>
+                      <span style={{ marginLeft: "auto" }}>₱{order.total.toFixed(2)}</span>
+                    </p>
+                    {!order.assignedRider && (
+                      <p style={{ backgroundColor: "#fff3cd", padding: "8px", borderRadius: "4px", marginTop: "10px", color: "#856404", width: "100%" }}>
+                        Note: Please call when arrived
+                      </p>
+                    )}
+                    {order.assignedRider && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px", width: "100%", backgroundColor: "#f0f0f0", padding: "10px", borderRadius: "6px" }}>
+                        <img src={riderImage} alt={order.assignedRider} style={{ width: "50px", height: "50px", borderRadius: "50%" }} />
+                        <div>
+                          <div style={{ fontWeight: "600" }}>{order.assignedRider}</div>
+                          <div>{riders[order.assignedRider]?.phone}</div>
+                          <div>Active Orders: {riders[order.assignedRider]?.activeOrders}</div>
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ marginTop: "10px", width: "100%" }}>
+                      <label htmlFor={`assignRider-${order.id}`} style={{ fontWeight: "600", marginBottom: "5px", display: "block" }}>Assign Rider</label>
+                      <Form.Select
+                        id={`assignRider-${order.id}`}
+                        value={order.assignedRider || ""}
+                        onChange={(e) => handleRiderChange(order.id, e.target.value)}
+                      >
+                        <option value="">Select Rider</option>
+                        <option value="rider1">Rider 1</option>
+                        <option value="rider2">Rider 2</option>
+                        <option value="rider3">Rider 3</option>
+                        <option value="rider4">Rider 4</option>
+                        <option value="rider5">Rider 5</option>
+                        <option value="rider6">Rider 6</option>
+                      </Form.Select>
+                      <label htmlFor={`orderStatus-${order.id}`} style={{ fontWeight: "600", marginBottom: "5px", display: "block", marginTop: "10px" }}>Order Status</label>
+                      <Form.Select
+                        id={`orderStatus-${order.id}`}
+                        value={order.currentStatus || ""}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="pickedUp">Picked Up</option>
+                        <option value="inTransit">In transit</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="returned">Cancelled/Returned</option>
+                      </Form.Select>
+                    </div>
+                  </Card>
+                ))
+              )}
+            </div>
           </Tab>
         </Tabs>
       </div>
