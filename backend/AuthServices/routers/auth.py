@@ -12,6 +12,7 @@ from fastapi import BackgroundTasks
 from email.message import EmailMessage
 from dotenv import load_dotenv
 from pydantic import EmailStr
+from typing import List
 
 load_dotenv()
 

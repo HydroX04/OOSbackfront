@@ -13,8 +13,8 @@ origins = [
     # DO NOT TOUCH THIS PLS
     "http://127.0.0.1:4002", # ums frontend
     "http://localhost:4002",  # ums frontend
-    "http://localhost:3001",      #OOS frontend
-    "http://127.0.0.1:3001",      #OOS frontend (localhost IP)
+    "http://localhost:5000",      #OOS frontend
+    "http://127.0.0.1:5000",      #OOS frontend (localhost IP)
     "http://localhost:8001",      # IMS Product Service
     "http://127.0.0.1:8001",
     "http://127.0.0.1:4000",  # auth service

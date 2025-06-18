@@ -19,22 +19,49 @@ app.include_router(users.router, prefix='/users', tags=['users'])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        # SUSUNTUKIN Q GOMALAW
+        "http://127.0.0.1:4002", # ums frontend
+        "http://localhost:4002",  # ums frontend
 
-        "http://localhost:4002", # AUTH FRONTEND
-        "http://127.0.0.1:4002", # AUTH FRONTEND (localhost IP)
-        "http://localhost:4000", "http://127.0.0.1:4000", # Auth Service 
+        # IMS frontend and services
+        "http://localhost:3000",  # ims frontend
+        "http://192.168.100.14:3000",  # ims frontend (local network)
+        "http://127.0.0.1:8001",  # ims (productservice)
+        "http://localhost:8001", 
+        "http://127.0.0.1:8002",  # ims (ingredientservice)
+        "http://localhost:8002",  
+        "http://127.0.0.1:8003",  # ims (materialservice) 
+        "http://localhost:8003", 
+        "http://127.0.0.1:8004",  # ims (merchandiseservice)
+        "http://localhost:8004", 
+        "http://127.0.0.1:8005",  # ims (recipeservice)
+        "http://localhost:8005", 
 
-        "http://localhost:3001", # OOS frontend
-        "http://127.0.0.1:3001", # OOS frontend (localhost IP)
-        "http://192.168.100.10:3001",  # For network testing local 
-        
-        # Microservices - both localhost and 127.0.0.1 for reliability
-        "http://localhost:7001", "http://127.0.0.1:7001",  # Delivery Service
-        "http://localhost:7002", "http://127.0.0.1:7002",  # Menu Service
-        "http://localhost:7003", "http://127.0.0.1:7003",  # Notification Service
-        "http://localhost:7004", "http://127.0.0.1:7004",  # Ordering Service
-        "http://localhost:7005", "http://127.0.0.1:7005",  # Payment Service
-        "http://localhost:7006", "http://127.0.0.1:7006",  # User Service 
+        # OOS frontend and services
+        "http://localhost:5000",  # oos frontend
+        "http://192.168.100.14:5000",  # oos frontend (local network)
+        "http://127.0.0.1:7001",  # oos (deliveryservice)
+        "http://localhost:7001", 
+        "http://127.0.0.1:7002",  # oos (menuservice)
+        "http://localhost:7002", 
+        "http://127.0.0.1:7003",  # oos (notificationservice)
+        "http://localhost:7003",  
+        "http://127.0.0.1:7004",  # oos (orderingservice) 
+        "http://localhost:7004", 
+        "http://127.0.0.1:7005",  # oos (paymentservice)
+        "http://localhost:7005", 
+        "http://127.0.0.1:7006",  # oos (userservice)
+        "http://localhost:7006",       
+
+        # POS frontend and services
+        "http://localhost:4001",
+        "http://192.168.100.10:4001",
+        "http://localhost:9000",
+        "http://127.0.0.1:9000", 
+        "http://localhost:9001",
+        "http://127.0.0.1:9001", 
+        "http://localhost:9002",
+        "http://127.0.0.1:9002",  
     ],
     allow_credentials=True,
     allow_methods=["*"],

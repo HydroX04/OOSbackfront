@@ -127,24 +127,57 @@ const LoginPage = () => {
         console.log('User System:', userSystem);
         
         setTimeout(() => {
-          // admin ims navigation
-          if (userRole === 'admin' && userSystem === 'IMS') {
-            
-            const targetUrl = new URL('http://localhost:3001/admin/dashboard');
+          // IMS
+          // manager navigation
+          if (userRole === 'manager' && userSystem === 'IMS') {
+            const targetUrl = new URL('http://localhost:3000/manager/dashboard/');
+            targetUrl.searchParams.append('username', trimmedUsername);
+            targetUrl.searchParams.append('authorization', access_token);
+            window.location.href = targetUrl.toString();
+          }
+          // staff navigation
+          if (userRole === 'staff' && userSystem === 'IMS') {
+            const targetUrl = new URL('http://localhost:3000/staff/dashboard/');
             targetUrl.searchParams.append('username', trimmedUsername);
             targetUrl.searchParams.append('authorization', access_token);
             window.location.href = targetUrl.toString();
           } 
-          else if (userRole === 'admin' && userSystem === 'OOS') {
-            const targetUrl = new URL('http://localhost:3001/admin/Dashboard');
+
+          // POS
+          // admin navigation
+          else if (userRole === 'admin' && userSystem === 'POS') {
+            const targetUrl = new URL('http://localhost:4001/admin/dashboard/');
             targetUrl.searchParams.append('username', trimmedUsername);
             targetUrl.searchParams.append('authorization', access_token);
             window.location.href = targetUrl.toString();
-            
           }
-          // superadmin navigation
-          else if (userRole === 'superadmin') {
-            
+          // cashier navigation
+          else if (userRole === 'cashier') {
+            const targetUrl = new URL('http://localhost:4001/cashier/menu');
+            targetUrl.searchParams.append('username', trimmedUsername);
+            targetUrl.searchParams.append('authorization', access_token);
+            window.location.href = targetUrl.toString();
+          }
+
+          //OOS 
+          // admin navigation
+          else if (userRole === 'admin' && userSystem === 'OOS') {
+            const targetUrl = new URL('http://localhost:5000/admin/dashboard/');
+            targetUrl.searchParams.append('username', trimmedUsername);
+            targetUrl.searchParams.append('authorization', access_token);
+            window.location.href = targetUrl.toString();
+          }
+          // rider navigation
+          else if (userRole === 'rider' && userSystem === 'OOS') {
+            const targetUrl = new URL('http://localhost:5000/rider/home');
+            targetUrl.searchParams.append('username', trimmedUsername);
+            targetUrl.searchParams.append('authorization', access_token);
+            window.location.href = targetUrl.toString();
+          } 
+
+          // UMS
+          // super admin ums navigation
+          else if (userRole === 'superadmin') {          
             navigate('/usermanagement', { 
               replace: true,
               state: { 
@@ -153,10 +186,10 @@ const LoginPage = () => {
               }
             });
           } 
-            else {
-              // MODIFICATION: Default navigation for other users, also passing state.
-              window.location.href = 'http://localhost:3001/';
-            }
+          // OOS outside user navigation
+          else {
+            window.location.href = 'http://localhost:5000/';
+          }
         }, 1000); 
       } else if (response.status === 401) {
         setFailedAttempts((prev) => {
@@ -174,7 +207,7 @@ const LoginPage = () => {
         });
       } else if (response.status === 403) {
         try {
-          const lockoutResponse = await fetch(`http://127.0.0.1:4000/lockout-status?username=${encodeURIComponent(trimmedUsername)}`);
+          const lockoutResponse = await fetch(`http://127.0.0.1:8000/lockout-status?username=${encodeURIComponent(trimmedUsername)}`);
           if (lockoutResponse.ok) {
             const lockoutData = await lockoutResponse.json();
             setIsLockedOut(true);
