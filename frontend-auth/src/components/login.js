@@ -188,7 +188,11 @@ const LoginPage = () => {
           } 
           // OOS outside user navigation
           else {
-            window.location.href = 'http://localhost:5000/';
+            // Redirect to localhost:5000 with authorization token in URL
+            const targetUrl = new URL('http://localhost:5000/');
+            targetUrl.searchParams.append('username', trimmedUsername);
+            targetUrl.searchParams.append('authorization', access_token);
+            window.location.href = targetUrl.toString();
           }
         }, 1000); 
       } else if (response.status === 401) {
