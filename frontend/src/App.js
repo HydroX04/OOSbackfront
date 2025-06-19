@@ -30,17 +30,19 @@ import Resetpassword from './components/Resetpassword';
 
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { AuthProvider } from './components/AuthContext';  // <-- Import AuthProvider
-
+import { CartProvider } from './contexts/CartContext';  // Import CartProvider
 
 
 
 function App() {
   return (
     <Router>
-      {/* Wrap the entire app in AuthProvider so context is shared */}
-      <AuthProvider>
-        <MainApp />
-      </AuthProvider>
+      {/* Wrap the entire app in CartProvider and AuthProvider so context is shared */}
+      <CartProvider>
+        <AuthProvider>
+          <MainApp />
+        </AuthProvider>
+      </CartProvider>
     </Router>
   );
 }

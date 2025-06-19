@@ -1,12 +1,17 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import qrImage from '../assets/qr.png';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './cart.css';
+import { CartContext } from '../contexts/CartContext';
 
 const Cart = () => {
   const navigate = useNavigate();
+
+  const { cartItems, incrementQuantity, decrementQuantity, removeFromCart } = useContext(CartContext);
+
+  const [selectedCartItems, setSelectedCartItems] = useState([]);
 
   const [receiptFile, setReceiptFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -27,15 +32,12 @@ const Cart = () => {
 
   const [errors, setErrors] = useState({});
 
-  const [cartItems, setCartItems] = useState([]);
-  const [selectedCartItems, setSelectedCartItems] = useState([]);
-
   // Function to handle checkbox change for individual items
   const handleCheckboxChange = (item, checked) => {
     if (checked) {
       setSelectedCartItems(prev => [...prev, item]);
     } else {
-      setSelectedCartItems(prev => prev.filter(ci => ci.id !== item.id));
+      setSelectedCartItems(prev => prev.filter(ci => ci.ProductID !== item.ProductID));
     }
   };
 
@@ -49,26 +51,22 @@ const Cart = () => {
   };
 
   const handleIncrement = (index) => {
-    const updatedItems = [...cartItems];
-    updatedItems[index].quantity += 1;
-    setCartItems(updatedItems);
+    const productId = cartItems[index].ProductID;
+    incrementQuantity(productId);
   };
 
   const handleDecrement = (index) => {
-    const updatedItems = [...cartItems];
-    if (updatedItems[index].quantity > 1) {
-      updatedItems[index].quantity -= 1;
-      setCartItems(updatedItems);
-    }
+    const productId = cartItems[index].ProductID;
+    decrementQuantity(productId);
   };
 
   const handleRemove = (index) => {
-    const updatedItems = [...cartItems];
-    updatedItems.splice(index, 1);
-    setCartItems(updatedItems);
+    const productId = cartItems[index].ProductID;
+    removeFromCart(productId);
+    setSelectedCartItems(prev => prev.filter(item => item.ProductID !== productId));
   };
 
-  const calculateTotal = (item) => item.price * item.quantity;
+  const calculateTotal = (item) => item.ProductPrice * item.quantity;
   const grandTotal = cartItems.reduce((acc, item) => acc + calculateTotal(item), 0);
 
   const handleFileChange = (e) => {
@@ -135,7 +133,9 @@ const Cart = () => {
     // Save order logic here (could be API call)
     toast.success('Order confirmed! Redirecting...');
     // Clear only cart items, keep form data and receipt file
-    setCartItems([]);
+    // Note: cartItems are managed by context, so clearing should be done via context if needed
+    // For now, no clear function implemented, so just redirect
+    setSelectedCartItems([]);
     // Redirect after 2 seconds
     setTimeout(() => {
       window.location.href = '/profile/orderhistory';
@@ -189,22 +189,19 @@ const Cart = () => {
                           type="checkbox"
                           style={{ margin: 0 }}
                           onChange={(e) => handleCheckboxChange(item, e.target.checked)}
-                          checked={selectedCartItems.some(ci => ci.id === item.id)}
+                          checked={selectedCartItems.some(ci => ci.ProductID === item.ProductID)}
                         />
                       </td>
                       <td style={{ verticalAlign: 'middle' }}>
                         <div className="d-flex align-items-center">
                           <img
-                            src="https://via.placeholder.com/60"
-                            alt="product"
+                            src={item.ProductImage ? (item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`) : "https://via.placeholder.com/60"}
+                            alt={item.ProductName}
                             className="img-fluid me-2 rounded"
                             style={{ height: '60px', width: '60px', objectFit: 'cover' }}
                           />
                           <div>
-                            <div className="fw-semibold">Specialty Coffee</div>
-                            <div className="text-muted" style={{ fontSize: '0.9rem' }}>
-                              {item.name}
-                            </div>
+                            <div className="fw-semibold">{item.ProductName}</div>
                           </div>
                         </div>
                       </td>
@@ -243,7 +240,7 @@ const Cart = () => {
                           </button>
                         </div>
                       </td>
-                      <td style={{ verticalAlign: 'middle', textAlign: 'right' }}>₱{item.price.toFixed(2)}</td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'right' }}>₱{item.ProductPrice.toFixed(2)}</td>
                       <td style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '50px' }}>₱{calculateTotal(item).toFixed(2)}</td>
                       <td style={{ verticalAlign: 'middle', paddingLeft: '20px' }}>{item.orderType}</td>
                       <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
@@ -302,9 +299,9 @@ const Cart = () => {
                 <tbody>
                   {selectedCartItems.map((item, i) => (
                     <tr key={i}>
-                      <td style={{ padding: '8px' }}>{item.name}</td>
+                              {item.ProductName}
                       <td style={{ textAlign: 'center', padding: '8px' }}>{item.quantity}</td>
-                      <td style={{ textAlign: 'right', padding: '8px' }}>₱{item.price.toFixed(2)}</td>
+                      <td style={{ textAlign: 'right', padding: '8px' }}>₱{item.ProductPrice.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import './menu.css';
+import { CartContext } from '../contexts/CartContext';  // Import CartContext
 
 
 const MenuContent = () => {
@@ -12,8 +13,9 @@ const MenuContent = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [orderNotes, setOrderNotes] = useState('');
 
-  
+  const { addToCart } = useContext(CartContext);  // Get addToCart from context
 
    useEffect(() => {
     const API_BASE_URL = "http://127.0.0.1:8001";
@@ -117,7 +119,10 @@ const MenuContent = () => {
   };
 
   const handleAddToCart = () => {
-    if (selectedItem) toast.success(`${selectedItem.ProductName} added to cart!`);
+    if (selectedItem) {
+      addToCart(selectedItem);  // Add item to cart context
+      toast.success(`${selectedItem.ProductName} added to cart!`);
+    }
   };
 
   const handleBuyNow = () => {
@@ -235,9 +240,11 @@ const MenuContent = () => {
                     <p className="text-muted">{selectedItem.ProductDescription}</p>
                     <p className="h5" style={{ textAlign: 'left' }}>₱{selectedItem.ProductPrice}</p>
 
-                    {/* Horizontal Group for Size and Type */}
+
+                    {/*
+                    
                     <div className="row mt-4">
-                      {/* Size Selection */}
+                   
                       <div className="col-md-6">
                         <h6>Size:</h6>
                         <div className="btn-group w-100" role="group">
@@ -266,7 +273,7 @@ const MenuContent = () => {
                         </div>
                       </div>
 
-                      {/* Type Selection */}
+                  
                       <div className="col-md-6">
                         <h6>Type:</h6>
                         <div className="btn-group w-100" role="group">
@@ -296,7 +303,7 @@ const MenuContent = () => {
                       </div>
                     </div>
 
-                    {/* Sugar Level */}
+           
                     <div className="mt-3">
                       <h6>Sugar Level:</h6>
                       <div className="btn-group w-100" role="group">
@@ -347,7 +354,6 @@ const MenuContent = () => {
                       </div>
                     </div>
 
-                    {/* Add-ons */}
                     <div className="mt-3">
                       <h6>Adds on:</h6>
                       <div className="form-check">
@@ -369,6 +375,7 @@ const MenuContent = () => {
                         </label>
                       </div>
                     </div>
+                    */}
 
                     {/* Order Method */}
                     <div className="mt-4">
@@ -397,6 +404,19 @@ const MenuContent = () => {
                           Delivery
                         </label>
                       </div>
+                    </div>
+
+                    {/* Add Notes */}
+                    <div className="mt-3">
+                      <label htmlFor="order-notes" className="form-label">Add Notes:</label>
+                      <textarea
+                        id="order-notes"
+                        className="form-control"
+                        rows="3"
+                        placeholder="Add any special instructions or notes here"
+                        value={orderNotes}
+                        onChange={(e) => setOrderNotes(e.target.value)}
+                      />
                     </div>
                   </div>
                 </div>
