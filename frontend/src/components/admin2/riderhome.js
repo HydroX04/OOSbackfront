@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FaSyncAlt, FaSignOutAlt, FaChevronDown } from "react-icons/fa";
 import { FaBoxOpen, FaCheckCircle, FaDollarSign, FaBell, FaBars, FaClock, FaUser, FaPhone, FaMapMarkerAlt, FaBox } from "react-icons/fa";
 import { Container, Card, Tabs, Tab, Form } from "react-bootstrap";
 import riderImage from "../../assets/rider.jpg";
@@ -49,6 +50,7 @@ function RiderHome() {
   const [tabKey, setTabKey] = useState('active');
   const [statusFilter, setStatusFilter] = useState("all");
   const [riderFilter, setRiderFilter] = useState("all");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // For testing: log orders to verify data
   useEffect(() => {
@@ -173,9 +175,38 @@ function RiderHome() {
             <img src={riderImage} alt="Rider" style={{ width: "60px", height: "60px", borderRadius: "50%", marginTop: "1.5rem" }} />
             <span style={{ color: "#4b929d", fontWeight: "600", fontSize: "1.2rem", marginTop: "1.5rem" }}>Rider 1</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "20px", fontSize: "24px", color: "#4b929d", cursor: "pointer" }}>
-            <FaBell />
-            <FaBars />
+
+
+          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "20px", fontSize: "24px", color: "white", cursor: "pointer" }}>
+            <FaBell color="white" />
+            <div style={{ position: "relative" }}>
+              <div onClick={() => setDropdownOpen(!dropdownOpen)} style={{ color: "white", display: "flex", alignItems: "center", cursor: "pointer" }}>
+                <FaBars color="white" />
+                <FaChevronDown style={{ marginLeft: "4px" }} />
+              </div>
+{dropdownOpen && (
+  <div style={{ position: "absolute", top: "100%", right: 0, backgroundColor: "white", border: "1px solid #ccc", borderRadius: "4px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", zIndex: 1000, minWidth: "90px" }}>
+    <ul style={{ listStyle: "none", margin: 0, padding: "4px 0" }}>
+      <li
+        onClick={() => window.location.reload()}
+        style={{ cursor: "pointer", padding: "4px 8px", display: "flex", alignItems: "center", gap: "4px", color: "#4b929d", fontSize: "1rem" }}
+        onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f0f0f0"}
+        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+      >
+        <FaSyncAlt size={14} /> Refresh
+      </li>
+      <li
+        onClick={() => alert('Logout clicked')}
+        style={{ cursor: "pointer", padding: "2px 8px", display: "flex", alignItems: "center", gap: "4px", color: "#dc3545", fontSize: "1rem" }}
+        onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f8d7da"}
+        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+      >
+        <FaSignOutAlt size={14} /> Logout
+      </li>
+    </ul>
+  </div>
+)}
+            </div>
           </div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-around", gap: "20px", flexWrap: "wrap" }}>
@@ -213,14 +244,14 @@ function RiderHome() {
           style={{ backgroundColor: "white", borderRadius: "8px", padding: "10px" }}
         >
           <Tab eventKey="active" title="Active Orders">
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "flex-start" }}>
+            <div className={`active-orders-container ${orders.filter(order => order.assignedRider === "rider1" && !["delivered", "cancelled", "returned"].includes(order.currentStatus)).length === 2 ? "two-cards" : ""}`}>
               {orders.filter(order => order.assignedRider === "rider1" &&
                 !["delivered", "cancelled", "returned"].includes(order.currentStatus)).length === 0 ? (
                 <p>No active orders.</p>
               ) : (
                 orders.filter(order => order.assignedRider === "rider1" &&
                   !["delivered", "cancelled", "returned"].includes(order.currentStatus)).map(order => (
-                  <Card key={order.id} style={{ padding: "20px", textAlign: "left", display: "flex", flexDirection: "column", alignItems: "flex-start", width: "300px", marginBottom: "15px" }}>
+                  <Card key={order.id} className="active-order-card" style={{ padding: "20px", textAlign: "left", display: "flex", flexDirection: "column", alignItems: "flex-start", width: "300px", marginBottom: "15px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                       <h5 style={{ color: "#4b929d" }}>Order #{order.id}</h5>
                       <p style={{

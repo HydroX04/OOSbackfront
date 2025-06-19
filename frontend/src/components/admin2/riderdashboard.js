@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronDown, FaBell, FaBoxOpen, FaCheckCircle, FaDollarSign, FaClock, FaUser, FaPhone, FaMapMarkerAlt, FaBox, FaTruckPickup, FaTruckMoving, FaUndo } from "react-icons/fa";
+import { FaChevronDown, FaBell, FaBoxOpen, FaCheckCircle, FaDollarSign, FaClock, FaUser, FaPhone, FaMapMarkerAlt, FaBox, FaTruckPickup, FaTruckMoving, FaUndo, FaSignOutAlt } from "react-icons/fa";
 import { Container, Card, Form } from "react-bootstrap";
 import riderImage from "../../assets/rider.jpg";
 import "../admin2/manageorder.css";
@@ -10,6 +10,20 @@ function RiderDashboard() {
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const dropdown = document.querySelector('.dropdown-icon');
+      if (dropdown && !dropdown.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   const [toggle, setToggle] = useState("active");
 
   const [statusFilter, setStatusFilter] = useState("all");
@@ -173,16 +187,32 @@ function RiderDashboard() {
                 <div className="profile-role">Hi! I'm {userRole}</div>
                 <div className="profile-name">{userName}</div>
               </div>
-              <div className="dropdown-icon" onClick={() => setDropdownOpen(!dropdownOpen)}><FaChevronDown /></div>
               <div className="bell-icon"><FaBell className="bell-outline" /></div>
-              {dropdownOpen && (
-                <div className="profile-dropdown">
-                  <ul>
-                    <li>Edit Profile</li>
-                    <li onClick={() => { localStorage.removeItem("access_token"); window.location.href = "/login"; }} style={{ cursor: "pointer" }}>Logout</li>
-                  </ul>
-                </div>
-              )}
+              <div className="dropdown-icon" style={{ cursor: "pointer", position: "relative" }} onClick={() => setDropdownOpen(!dropdownOpen)}>
+                <FaChevronDown />
+                {dropdownOpen && (
+                  <div className="profile-dropdown" style={{ position: "absolute", top: "100%", right: 0, backgroundColor: "white", border: "1px solid #ccc", borderRadius: "4px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", zIndex: 1000, width: "150px" }}>
+                    <ul style={{ listStyle: "none", margin: 0, padding: "8px 0" }}>
+                      <li
+                        onClick={() => window.location.reload()}
+                        style={{ cursor: "pointer", padding: "8px 16px", display: "flex", alignItems: "center", gap: "8px", color: "#4b929d" }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f0f0f0"}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+                      >
+                        <FaUndo /> Refresh
+                      </li>
+                      <li
+                        onClick={() => { localStorage.removeItem("access_token"); window.location.href = "/login"; }}
+                        style={{ cursor: "pointer", padding: "8px 16px", display: "flex", alignItems: "center", gap: "8px", color: "#dc3545" }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f8d7da"}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+                      >
+                        <FaSignOutAlt /> Logout
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>
