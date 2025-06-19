@@ -10,8 +10,8 @@ async def get_products_from_ims():
     # Get IMS token using credentials
     ims_token_url = "http://localhost:4000/auth/token"
     ims_auth_data = {
-        "username": "zekewyd",
-        "password": "zeke123"
+        "username": "managerIMS",
+        "password": "manager123"
     }
     ims_token = None
     try:

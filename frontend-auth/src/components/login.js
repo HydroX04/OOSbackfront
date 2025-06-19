@@ -175,6 +175,13 @@ const LoginPage = () => {
             window.location.href = targetUrl.toString();
           } 
 
+          else if (userRole === 'user' && userSystem === 'OOS') {
+            const targetUrl = new URL('http://localhost:5000/');
+            targetUrl.searchParams.append('username', trimmedUsername);
+            targetUrl.searchParams.append('authorization', access_token);
+            window.location.href = targetUrl.toString();
+          } 
+
           // UMS
           // super admin ums navigation
           else if (userRole === 'superadmin') {          

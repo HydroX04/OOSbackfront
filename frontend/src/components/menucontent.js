@@ -15,52 +15,94 @@ const MenuContent = () => {
 
   
 
-  useEffect(() => {
-    // Fetch products from backend API
-    const token = localStorage.getItem('token');
-    fetch('http://localhost:7002/menu/products', {
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : ''
-      }
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Fetched products data:', data);
-        // Organize products by ProductTypeID and ProductCategory
-        // Assuming ProductTypeID corresponds to 'Drinks' or 'Food'
-        // We will map ProductTypeID to 'Drinks' or 'Food' based on the user's description
-        // Since the user said drinks and food are product types, we assume ProductTypeID is either 'Drinks' or 'Food'
-        // Group products accordingly
-        const typeIdToCategory = {
-          2: 'Drinks',
-          5: 'Food'
-        };
-        const grouped = {};
-        data.forEach((product) => {
-          const type = typeIdToCategory[product.ProductTypeID] || 'Other';
-          const category = product.ProductCategory;
-          if (!grouped[type]) {
-            grouped[type] = {};
-          }
-          if (!grouped[type][category]) {
-            grouped[type][category] = [];
-          }
-          grouped[type][category].push(product);
-        });
-        setProducts(grouped);
+   useEffect(() => {
+    const API_BASE_URL = "http://127.0.0.1:8001";
 
-        // Set default selected subcategory to first subcategory of Drinks if exists
-        if (grouped['Drinks']) {
-          const firstSubcat = Object.keys(grouped['Drinks'])[0];
-          setSelectedSubcategory(firstSubcat || '');
+    const fetchAllData = async () => {
+      const token = localStorage.getItem("authToken");
+
+      try {
+        if (token) {
+          const headers = { Authorization: `Bearer ${token}` };
+
+          const [typesResponse, productsResponse, productsDetailsResponse] = await Promise.all([
+            fetch(`${API_BASE_URL}/ProductType/`, { headers }),
+            fetch(`${API_BASE_URL}/is_products/products/`, { headers }),
+            fetch(`${API_BASE_URL}/is_products/products/details/`, { headers }),
+          ]);
+
+          if (!typesResponse.ok || !productsResponse.ok || !productsDetailsResponse.ok) {
+            throw new Error("Failed to fetch all necessary data.");
+          }
+
+          const apiTypes = await typesResponse.json();
+          const apiProducts = await productsResponse.json();
+          const apiProductsDetails = await productsDetailsResponse.json();
+
+          const productStatusMap = apiProductsDetails.reduce((acc, detail) => {
+            acc[detail.ProductName] = detail.Status;
+            return acc;
+          }, {});
+
+          const transformedProducts = apiProducts.map((product) => ({
+            ...product,
+            Status: productStatusMap[product.ProductName] || "Available",
+          }));
+
+          const grouped = {};
+          apiTypes.forEach((type) => {
+            grouped[type.productTypeName] = {};
+          });
+
+          transformedProducts.forEach((product) => {
+            const typeName = product.ProductTypeName || "Other";
+            const category = product.ProductCategory || "Other";
+            if (!grouped[typeName]) grouped[typeName] = {};
+            if (!grouped[typeName][category]) grouped[typeName][category] = [];
+            grouped[typeName][category].push(product);
+          });
+
+          setProducts(grouped);
+
+          if (grouped["Drinks"]) {
+            const firstSubcat = Object.keys(grouped["Drinks"])[0];
+            setSelectedSubcategory(firstSubcat || "");
+          } else {
+            setSelectedSubcategory("");
+          }
         } else {
-          setSelectedSubcategory('');
+          const publicResponse = await fetch(`${API_BASE_URL}/is_products/public/products/`);
+          if (!publicResponse.ok) throw new Error("Failed to fetch public product data.");
+          const publicProducts = await publicResponse.json();
+
+          const grouped = {};
+          publicProducts.forEach((product) => {
+            const typeName = product.ProductTypeName || "Other";
+            const category = product.ProductCategory || "Other";
+            if (!grouped[typeName]) grouped[typeName] = {};
+            if (!grouped[typeName][category]) grouped[typeName][category] = [];
+            grouped[typeName][category].push({
+              ...product,
+              Status: "Available",
+            });
+          });
+
+          setProducts(grouped);
+
+          if (grouped["Drinks"]) {
+            const firstSubcat = Object.keys(grouped["Drinks"])[0];
+            setSelectedSubcategory(firstSubcat || "");
+          } else {
+            setSelectedSubcategory("");
+          }
         }
-      })
-      .catch((error) => {
-        console.error('Error fetching products:', error);
-        toast.error('Failed to load products');
-      });
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Failed to load products");
+      }
+    };
+
+    fetchAllData();
   }, []);
 
   const handleCategoryClick = (category, subcategory) => {
@@ -75,23 +117,17 @@ const MenuContent = () => {
   };
 
   const handleAddToCart = () => {
-    if (selectedItem) {
-      toast.success(`${selectedItem.ProductName} added to cart!`);
-    }
+    if (selectedItem) toast.success(`${selectedItem.ProductName} added to cart!`);
   };
 
   const handleBuyNow = () => {
-    if (selectedItem) {
-      toast.info(`Buying ${selectedItem.ProductName} now!`);
-    }
+    if (selectedItem) toast.info(`Buying ${selectedItem.ProductName} now!`);
   };
 
   const handleClose = () => setShowModal(false);
 
-  // Get subcategories for selected category
   const subcategories = products[selectedCategory] ? Object.keys(products[selectedCategory]) : [];
 
-  // If selectedSubcategory is empty or not in subcategories, set to first subcategory
   useEffect(() => {
     if (selectedCategory && products[selectedCategory]) {
       if (!selectedSubcategory || !subcategories.includes(selectedSubcategory)) {
@@ -100,7 +136,6 @@ const MenuContent = () => {
     }
   }, [selectedCategory, products]);
 
-  // Get current items based on selected category and subcategory
   const currentItems = (products[selectedCategory] && products[selectedCategory][selectedSubcategory]) || [];
 
   return (
@@ -110,32 +145,23 @@ const MenuContent = () => {
         <aside className="menu-sidebar">
           <h2 className="menu-title">Menu</h2>
           <div className="menu-category">
-            <h3>Drinks</h3>
-            <ul>
-              {products['Drinks'] &&
-                Object.keys(products['Drinks']).map((subcat) => (
-                  <li
-                    key={subcat}
-                    onClick={() => handleCategoryClick('Drinks', subcat)}
-                    style={{ cursor: 'pointer', fontWeight: selectedCategory === 'Drinks' && selectedSubcategory === subcat ? 'bold' : 'normal' }}
-                  >
-                    {subcat}
-                  </li>
-                ))}
-            </ul>
-            <h3>Food</h3>
-            <ul>
-              {products['Food'] &&
-                Object.keys(products['Food']).map((subcat) => (
-                  <li
-                    key={subcat}
-                    onClick={() => handleCategoryClick('Food', subcat)}
-                    style={{ cursor: 'pointer', fontWeight: selectedCategory === 'Food' && selectedSubcategory === subcat ? 'bold' : 'normal' }}
-                  >
-                    {subcat}
-                  </li>
-                ))}
-            </ul>
+            {Object.keys(products).map((productType) => (
+              <div key={productType}>
+                <h3>{productType}</h3>
+                <ul>
+                  {products[productType] &&
+                    Object.keys(products[productType]).map((subcat) => (
+                      <li
+                        key={subcat}
+                        onClick={() => handleCategoryClick(productType, subcat)}
+                        style={{ cursor: 'pointer', fontWeight: selectedCategory === productType && selectedSubcategory === subcat ? 'bold' : 'normal' }}
+                      >
+                        {subcat}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </aside>
 
@@ -176,7 +202,7 @@ const MenuContent = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <div className="item-image-placeholder">
-                  {item.ProductImage ? <img src={`http://localhost:8001${item.ProductImage}`} alt={item.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'Image'}
+{item.ProductImage ? <img src={item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`} alt={item.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'Image'}
                 </div>
                 <div className="item-name-placeholder">{item.ProductName}</div>
               </div>
@@ -196,11 +222,11 @@ const MenuContent = () => {
                   <div className="col-md-6">
                     <div className="modal-image-placeholder">
                       <div className="d-flex align-items-center justify-content-center h-100 bg-light">
-                          {selectedItem.ProductImage ? (
-                          <img src={`http://localhost:8001${selectedItem.ProductImage}`} alt={selectedItem.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <span className="text-muted">Item Image</span>
-                        )}
+{selectedItem.ProductImage ? (
+  <img src={selectedItem.ProductImage.startsWith('http') ? selectedItem.ProductImage : `http://localhost:8001${selectedItem.ProductImage}`} alt={selectedItem.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+) : (
+  <span className="text-muted">Item Image</span>
+)}
                       </div>
                     </div>
                   </div>
