@@ -272,7 +272,7 @@ const Cart = () => {
               <div className="btn-group-toggle btn-group-toggle-center" role="group" aria-label="Order Type Toggle">
                 <button
                   type="button"
-                  className={`${orderTypeMain === 'Pick Up' ? 'btn-active-custom' : ''}`}
+                  className={${orderTypeMain === 'Pick Up' ? 'btn-active-custom' : ''}}
                   style={{ minWidth: '120px', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
                   onClick={() => setOrderTypeMain('Pick Up')}
                 >
@@ -281,7 +281,7 @@ const Cart = () => {
                 </button>
                 <button
                   type="button"
-                  className={`${orderTypeMain === 'Delivery' ? 'btn-active-custom' : ''}`}
+                  className={${orderTypeMain === 'Delivery' ? 'btn-active-custom' : ''}}
                   style={{ minWidth: '120px', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
                   onClick={() => setOrderTypeMain('Delivery')}
                 >
@@ -340,7 +340,7 @@ const Cart = () => {
                       <div className="btn-group-toggle mt-2" style={{ margin: '0 auto' }}>
                         <button
                           type="button"
-                          className={`d-flex align-items-center justify-content-center ${paymentMethodMain === 'Cash' ? 'btn-active-custom' : ''}`}
+                          className={d-flex align-items-center justify-content-center ${paymentMethodMain === 'Cash' ? 'btn-active-custom' : ''}}
                           style={{ minWidth: '120px' }}
                           onClick={() => setPaymentMethodMain('Cash')}
                         >
@@ -349,7 +349,7 @@ const Cart = () => {
                         </button>
                         <button
                           type="button"
-                          className={`d-flex align-items-center justify-content-center ${paymentMethodMain === 'E-Wallet' ? 'btn-active-custom' : ''}`}
+                          className={d-flex align-items-center justify-content-center ${paymentMethodMain === 'E-Wallet' ? 'btn-active-custom' : ''}}
                           style={{ minWidth: '120px' }}
                           onClick={() => setPaymentMethodMain('E-Wallet')}
                         >

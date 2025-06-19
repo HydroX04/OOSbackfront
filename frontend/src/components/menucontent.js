@@ -116,9 +116,56 @@ const MenuContent = () => {
     setShowModal(true);
   };
 
-  const handleAddToCart = () => {
-    if (selectedItem) toast.success(`${selectedItem.ProductName} added to cart!`);
+  const handleAddToCart = async () => {
+  if (!selectedItem) return;
+
+  const token = localStorage.getItem("authToken");
+  const userID = localStorage.getItem("userID"); // Store userID upon login if not yet
+
+  if (!token || !userID) {
+    toast.error("You must be logged in.");
+    return;
+  }
+
+  // Get selected options
+  const size = document.querySelector('input[name="size"]:checked')?.id?.replace("size-", "") || null;
+  const sugarLevel = document.querySelector('input[name="sugar-level"]:checked')?.id?.replace("sugar-", "") || null;
+  const orderType = document.querySelector('input[name="order-method"]:checked')?.id?.replace("method-", "") || "pickup";
+
+  const addons = [];
+  if (document.getElementById("espresso-shot")?.checked) addons.push("Espresso Shot");
+  if (document.getElementById("seasalt-cream")?.checked) addons.push("Seasalt Cream");
+  if (document.getElementById("syrup-sauces")?.checked) addons.push("Syrup/Sauces");
+
+  const cartItem = {
+    userID,
+    productID: selectedItem.ProductID,
+    sizeID: size,
+    sugarLevel,
+    quantity: 1,
+    addons,
+    orderType,
   };
+
+  try {
+    const response = await fetch("http://localhost:7004/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(cartItem)
+    });
+
+    if (!response.ok) throw new Error("Failed to add to cart");
+
+    toast.success(`${selectedItem.ProductName} added to cart!`);
+    handleClose();
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    toast.error("Failed to add item to cart");
+  }
+};
 
   const handleBuyNow = () => {
     if (selectedItem) toast.info(`Buying ${selectedItem.ProductName} now!`);
