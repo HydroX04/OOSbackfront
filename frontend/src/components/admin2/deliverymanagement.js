@@ -15,92 +15,9 @@ function DeliveryManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [riderFilter, setRiderFilter] = useState("all");
 
-  const [orders, setOrders] = useState([
-    {
-      id: "ORD001",
-      status: "Ready for Pickup",
-      currentStatus: "pending",
-      orderedAt: "10:22 PM",
-      customerName: "John Smith",
-      phone: "+1-555-1001",
-      address: "123 Main St, Downtown, City 12345",
-      items: [
-        { name: "Cappuccino (Large)", quantity: 2, price: 11.00 },
-        { name: "Blueberry Muffin", quantity: 1, price: 3.25 }
-      ],
-      total: 14.25,
-      assignedRider: ""
-    },
-    {
-      id: "ORD002",
-      status: "Preparing",
-      currentStatus: "pending",
-      orderedAt: "11:15 AM",
-      customerName: "Jane Doe",
-      phone: "+1-555-2002",
-      address: "456 Oak St, Uptown, City 67890",
-      items: [
-        { name: "Latte (Medium)", quantity: 1, price: 4.50 },
-        { name: "Chocolate Croissant", quantity: 2, price: 5.00 }
-      ],
-      total: 9.50,
-      assignedRider: ""
-    },
-    {
-      id: "ORD003",
-      status: "In Progress",
-      currentStatus: "pending",
-      orderedAt: "9:45 AM",
-      customerName: "Alice Johnson",
-      phone: "+1-555-3003",
-      address: "789 Pine St, Midtown, City 54321",
-      items: [
-        { name: "Espresso", quantity: 3, price: 9.00 },
-        { name: "Blueberry Scone", quantity: 1, price: 3.00 }
-      ],
-      total: 12.00,
-      assignedRider: ""
-    }
-  ]);
+  const [orders, setOrders] = useState([]);
 
-  const riders = {
-    rider1: {
-      name: "Rider 1",
-      phone: "+1-555-1111",
-      activeOrders: 3,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider2: {
-      name: "Rider 2",
-      phone: "+1-555-2222",
-      activeOrders: 2,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider3: {
-      name: "Rider 3",
-      phone: "+1-555-3333",
-      activeOrders: 1,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider4: {
-      name: "Rider 4",
-      phone: "+1-555-4444",
-      activeOrders: 0,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider5: {
-      name: "Rider 5",
-      phone: "+1-555-5555",
-      activeOrders: 0,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider6: {
-      name: "Rider 6",
-      phone: "+1-555-6666",
-      activeOrders: 0,
-      imageUrl: "https://via.placeholder.com/50"
-    }
-  };
+  const riders = {};
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -185,45 +102,67 @@ function DeliveryManagement() {
           </div>
         </header>
         <div className="status-labels" style={{ display: "flex", justifyContent: "space-around", marginTop: "10px", marginBottom: "20px", gap: "15px", flexWrap: "wrap" }}>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaClock color="#d39e00" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Pending</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>5 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaCheckCircle color="#198754" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Confirmed</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>3 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaSpinner color="#2980b9" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Preparing</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>7 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaTruckPickup color="#0d6efd" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Picked up</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>4 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaTruckMoving color="#6610f2" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>In transit</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>5 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaTruck color="#198754" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Delivered</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>7 orders</span>
-          </Card>
-          <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <FaUndo color="#fd7e14" size={32} />
-            <span style={{ fontSize: "1rem", fontWeight: "400" }}>Cancelled/Returned</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>3 orders</span>
-          </Card>
+          {(() => {
+            const statusCounts = {
+              pending: 0,
+              confirmed: 0,
+              preparing: 0,
+              pickedUp: 0,
+              inTransit: 0,
+              delivered: 0,
+              cancelled: 0,
+              returned: 0,
+            };
+            orders.forEach(order => {
+              const status = order.currentStatus;
+              if (statusCounts.hasOwnProperty(status)) {
+                statusCounts[status]++;
+              }
+            });
+            return (
+              <>
+                <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <FaClock color="#d39e00" size={32} />
+                  <span style={{ fontSize: "1rem", fontWeight: "400" }}>Pending</span>
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>{statusCounts.pending}</span>
+                </Card>
+                <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <FaCheckCircle color="#198754" size={32} />
+                  <span style={{ fontSize: "1rem", fontWeight: "400" }}>Confirmed</span>
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>{statusCounts.confirmed}</span>
+                </Card>
+                <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <FaSpinner color="#2980b9" size={32} />
+                  <span style={{ fontSize: "1rem", fontWeight: "400" }}>Preparing</span>
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>{statusCounts.preparing}</span>
+                </Card>
+                <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <FaTruckPickup color="#0d6efd" size={32} />
+                  <span style={{ fontSize: "1rem", fontWeight: "400" }}>Picked up</span>
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>{statusCounts.pickedUp}</span>
+                </Card>
+                <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <FaTruckMoving color="#6610f2" size={32} />
+                  <span style={{ fontSize: "1rem", fontWeight: "400" }}>In transit</span>
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>{statusCounts.inTransit}</span>
+                </Card>
+                <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <FaTruck color="#198754" size={32} />
+                  <span style={{ fontSize: "1rem", fontWeight: "400" }}>Delivered</span>
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>{statusCounts.delivered}</span>
+                </Card>
+                <Card style={{ flex: "1", minWidth: "150px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <FaUndo color="#fd7e14" size={32} />
+                  <span style={{ fontSize: "1rem", fontWeight: "400" }}>Cancelled/Returned</span>
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", textAlign: "center" }}>{statusCounts.cancelled + statusCounts.returned}</span>
+                </Card>
+              </>
+            );
+          })()}
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "15px", marginTop: "20px", backgroundColor: "transparent", padding: "10px", borderRadius: "8px" }}>
           <div style={{ fontWeight: "600", fontSize: "1rem" }}>
-            Orders 6 of 6
+            Orders {orders.length} of {orders.length}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <FaFilter size={20} />

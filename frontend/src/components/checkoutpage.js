@@ -20,56 +20,9 @@ const CheckoutPage = () => {
             </thead>
             <tbody>
               <tr>
-                <td><strong>Specialty Coffee</strong><br />Spanish Latte</td>
-                <td>Medium</td>
-                <td>Hot</td>
-                <td>Less Sugar</td>
-                <td>Boba</td>
-                <td>Delivery</td>
-                <td>Gcash</td>
-                <td>₱175.00</td>
+                <td colSpan="8" style={{ height: '200px' }}></td>
               </tr>
-              <tr>
-                <td><strong>Specialty Coffee</strong><br />Spanish Latte</td>
-                <td>Medium</td>
-                <td>Hot</td>
-                <td>Less Sugar</td>
-                <td>Boba</td>
-                <td>Pickup</td>
-                <td>Gcash</td>
-                <td>₱175.00</td>
-              </tr>
-            <tr>
-              <td style={{ fontWeight: 'bold' }}>Sub Total</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td style={{ verticalAlign: 'middle' }}>₱350.00</td>
-            </tr>
-            <tr>
-              <td style={{ fontWeight: 'bold' }}>Delivery Fee</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td style={{ verticalAlign: 'middle' }}>₱50.00</td>
-            </tr>
-            <tr>
-              <td style={{ fontWeight: 'bold' }}>Order Total</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td style={{ verticalAlign: 'middle', fontWeight: 'bold'  }}>₱400.00</td>
-            </tr>
-          </tbody>
+            </tbody>
         </table>
         <div className="mt-4 p-3 bg-white rounded">
           <h2 className="mb-4" style={{ color: '#4B929D', textAlign: 'left' }}>Delivery Information</h2>

@@ -68,32 +68,7 @@ export default function AppHeader() {
   }, []);
 
   // Notification state and functions (copied from Notification.js)
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: 'New Order Received',
-      message: 'You have received a new order #12345',
-      time: '10 minutes ago',
-      isRead: false,
-      type: 'order'
-    },
-    {
-      id: 2,
-      title: 'Payment Processed',
-      message: 'Payment for order #12344 has been processed',
-      time: '2 hours ago',
-      isRead: false,
-      type: 'payment'
-    },
-    {
-      id: 3,
-      title: 'System Update',
-      message: 'New features have been added to your dashboard',
-      time: '1 day ago',
-      isRead: true,
-      type: 'system'
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   const markAllAsRead = () => {
     setNotifications(notifications.map(notification => ({

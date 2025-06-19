@@ -31,7 +31,7 @@ import {
 const data = [
   {
     title: "Total Revenue",
-    current: 500000,
+    current: 0,
     previous: 450000,
     format: "currency",
     icon: faDollarSign,
@@ -39,7 +39,7 @@ const data = [
   },
   {
     title: "Total Orders",
-    current: 1200,
+    current: 0,
     previous: 1100,
     format: "number",
     icon: faClipboardList,
@@ -47,7 +47,7 @@ const data = [
   },
   {
     title: "Avg Order Value",
-    current: 420,
+    current: 0,
     previous: 400,
     format: "currency",
     icon: faChartPie,
@@ -55,7 +55,7 @@ const data = [
   },
   {
     title: "Completion Rate",
-    current: 95,
+    current: 0,
     previous: 92,
     format: "number",
     icon: faCheckCircle,
@@ -64,90 +64,6 @@ const data = [
 ];
 
 const sampleTableData = [
-  {
-    date: '2024-06-01',
-    orderId: 'ORD12345',
-    customerName: 'John Doe',
-    orderStatus: 'Completed',
-    paymentMethod: 'GCash',
-    timeOrdered: '10:30 AM',
-    totalAmount: 1500,
-    itemsOrdered: 'Coffee, Muffin',
-    orderType: 'Dine-in',
-    handledBy: 'Admin1'
-  },
-  {
-    date: '2024-06-02',
-    orderId: 'ORD12346',
-    customerName: 'Jane Smith',
-    orderStatus: 'Pending',
-    paymentMethod: 'COD',
-    timeOrdered: '11:00 AM',
-    totalAmount: 800,
-    itemsOrdered: 'Latte',
-    orderType: 'Takeout',
-    handledBy: 'Admin2'
-  },
-  {
-    date: '2024-06-02',
-    orderId: 'ORD12347',
-    customerName: 'Alice Johnson',
-    orderStatus: 'Cancelled',
-    paymentMethod: 'Credit Card',
-    timeOrdered: '09:45 AM',
-    totalAmount: 0,
-    itemsOrdered: 'Espresso',
-    orderType: 'Delivery',
-    handledBy: 'Admin1'
-  },
-  {
-    date: '2024-06-03',
-    orderId: 'ORD12348',
-    customerName: 'Bob Brown',
-    orderStatus: 'Completed',
-    paymentMethod: 'GCash',
-    timeOrdered: '02:15 PM',
-    totalAmount: 1200,
-    itemsOrdered: 'Cappuccino, Sandwich',
-    orderType: 'Dine-in',
-    handledBy: 'Admin1'
-  },
-  {
-    date: '2024-06-04',
-    orderId: 'ORD12349',
-    customerName: 'Charlie Davis',
-    orderStatus: 'Completed',
-    paymentMethod: 'Credit Card',
-    timeOrdered: '03:30 PM',
-    totalAmount: 950,
-    itemsOrdered: 'Tea, Cookie',
-    orderType: 'Takeout',
-    handledBy: 'Admin2'
-  },
-  {
-    date: '2024-06-05',
-    orderId: 'ORD12350',
-    customerName: 'Diana Evans',
-    orderStatus: 'Pending',
-    paymentMethod: 'COD',
-    timeOrdered: '10:00 AM',
-    totalAmount: 650,
-    itemsOrdered: 'Americano',
-    orderType: 'Delivery',
-    handledBy: 'Admin1'
-  },
-  {
-    date: '2024-06-05',
-    orderId: 'ORD12351',
-    customerName: 'Ethan Foster',
-    orderStatus: 'Completed',
-    paymentMethod: 'GCash',
-    timeOrdered: '11:45 AM',
-    totalAmount: 1800,
-    itemsOrdered: 'Latte, Croissant, Muffin',
-    orderType: 'Dine-in',
-    handledBy: 'Admin2'
-  },
 ];
 
 const formatValue = (value, format) => {
@@ -307,28 +223,7 @@ const Report = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentRows.length > 0 ? (
-                  currentRows.map((row, index) => (
-                    <tr key={index}>
-                      <td>{row.date}</td>
-                      <td>{row.orderId}</td>
-                      <td>{row.customerName}</td>
-                      <td>
-                        <span className={`status-${row.orderStatus.toLowerCase()}`}>{row.orderStatus}</span>
-                      </td>
-                      <td>{row.paymentMethod}</td>
-                      <td>{row.timeOrdered}</td>
-                      <td style={{ textAlign: "left" }}>₱{row.totalAmount.toLocaleString()}</td>
-                      <td>{row.itemsOrdered}</td>
-                      <td>{row.orderType}</td>
-                      <td>{row.handledBy}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="10" className="text-center">No reports found</td>
-                  </tr>
-                )}
+                {/* Backend data will be rendered here */}
               </tbody>
             </table>
 

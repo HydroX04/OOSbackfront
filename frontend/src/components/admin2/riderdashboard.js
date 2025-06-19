@@ -31,92 +31,9 @@ function RiderDashboard() {
 
   const [selectedRider, setSelectedRider] = useState("rider1");
 
-  const [orders, setOrders] = useState([
-    {
-      id: "ORD001",
-      status: "Ready for Pickup",
-      currentStatus: "pending",
-      orderedAt: "10:22 PM",
-      customerName: "John Smith",
-      phone: "+1-555-1001",
-      address: "123 Main St, Downtown, City 12345",
-      items: [
-        { name: "Cappuccino (Large)", quantity: 2, price: 11.00 },
-        { name: "Blueberry Muffin", quantity: 1, price: 3.25 }
-      ],
-      total: 14.25,
-      assignedRider: "rider1"
-    },
-    {
-      id: "ORD002",
-      status: "Preparing",
-      currentStatus: "pending",
-      orderedAt: "11:15 AM",
-      customerName: "Jane Doe",
-      phone: "+1-555-2002",
-      address: "456 Oak St, Uptown, City 67890",
-      items: [
-        { name: "Latte (Medium)", quantity: 1, price: 4.50 },
-        { name: "Chocolate Croissant", quantity: 2, price: 5.00 }
-      ],
-      total: 9.50,
-      assignedRider: "rider2"
-    },
-    {
-      id: "ORD003",
-      status: "In Progress",
-      currentStatus: "pending",
-      orderedAt: "9:45 AM",
-      customerName: "Alice Johnson",
-      phone: "+1-555-3003",
-      address: "789 Pine St, Midtown, City 54321",
-      items: [
-        { name: "Espresso", quantity: 3, price: 9.00 },
-        { name: "Blueberry Scone", quantity: 1, price: 3.00 }
-      ],
-      total: 12.00,
-      assignedRider: "rider1"
-    }
-  ]);
+  const [orders, setOrders] = useState([]);
 
-  const riders = {
-    rider1: {
-      name: "Rider 1",
-      phone: "+1-555-1111",
-      activeOrders: 3,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider2: {
-      name: "Rider 2",
-      phone: "+1-555-2222",
-      activeOrders: 2,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider3: {
-      name: "Rider 3",
-      phone: "+1-555-3333",
-      activeOrders: 1,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider4: {
-      name: "Rider 4",
-      phone: "+1-555-4444",
-      activeOrders: 0,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider5: {
-      name: "Rider 5",
-      phone: "+1-555-5555",
-      activeOrders: 0,
-      imageUrl: "https://via.placeholder.com/50"
-    },
-    rider6: {
-      name: "Rider 6",
-      phone: "+1-555-6666",
-      activeOrders: 0,
-      imageUrl: "https://via.placeholder.com/50"
-    }
-  };
+  const riders = {};
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -219,8 +136,8 @@ function RiderDashboard() {
         <Container fluid style={{ backgroundColor: "#a3d3d8", borderRadius: "8px", padding: "20px", marginTop: "20px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-              <img src={riderImage} alt={riders[selectedRider].name} style={{ width: "60px", height: "60px", borderRadius: "50%" }} />
-              <span style={{ color: "#4b929d", fontWeight: "600", fontSize: "1.2rem" }}>{riders[selectedRider].name}</span>
+              <img src={riders[selectedRider]?.imageUrl || riderImage} alt={riders[selectedRider]?.name || "Rider"} style={{ width: "60px", height: "60px", borderRadius: "50%" }} />
+              <span style={{ color: "#4b929d", fontWeight: "600", fontSize: "1.2rem" }}>{riders[selectedRider]?.name || "Rider"}</span>
             </div>
             <select
               style={{ height: "30px", width: "200px", fontSize: "1rem", fontWeight: "600", color: "black", borderRadius: "4px", border: "none", backgroundColor: "white" }}

@@ -27,11 +27,7 @@ const Cart = () => {
 
   const [errors, setErrors] = useState({});
 
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Spanish Latte', price: 59, quantity: 1, orderType: 'Pick-Up' },
-    { id: 2, name: 'Spanish Latte', price: 59, quantity: 1, orderType: 'Delivery' },
-    { id: 3, name: 'Spanish Latte', price: 59, quantity: 1, orderType: 'Pick-Up' },
-  ]);
+  const [cartItems, setCartItems] = useState([]);
   const [selectedCartItems, setSelectedCartItems] = useState([]);
 
   // Function to handle checkbox change for individual items
@@ -260,12 +256,7 @@ const Cart = () => {
                       </td>
                     </tr>
                   ))}
-                  {/* Removed Grand Total row as per user request */}
-                  {/* <tr>
-                    <td colSpan="3" className="text-end fw-bold" style={{ verticalAlign: 'right',  }}>Grand Total:</td>
-                    <td className="fw-bold" style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '50px' }}>₱{grandTotal.toFixed(2)}</td>
-                    <td colSpan="2"></td>
-                  </tr> */}
+
                 </tbody>
               </table>
             </div>

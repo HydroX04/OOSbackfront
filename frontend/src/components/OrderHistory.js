@@ -7,66 +7,9 @@ const OrderHistory = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [ordersData, setOrdersData] = useState({
-    pending: [
-      {
-        id: 1,
-        date: '2023-05-01',
-        total: 25.99,
-        items: 3,
-        status: 'pending',
-        orderType: 'Delivery',
-        products: [
-          { id: 101, name: 'Product A', quantity: 1, price: 10.0, image: 'placeholder' },
-          { id: 102, name: 'Product B', quantity: 2, price: 7.995, image: 'placeholder' },
-        ],
-      },
-      {
-        id: 2,
-        date: '2023-05-03',
-        total: 42.5,
-        items: 5,
-        status: 'pending',
-        orderType: 'Pickup',
-        products: [
-          { id: 103, name: 'Product C', quantity: 3, price: 8.5, image: 'placeholder' },
-          { id: 104, name: 'Product D', quantity: 2, price: 8.75, image: 'placeholder' },
-        ],
-      },
-    ],
-    completed: [
-      {
-        id: 3,
-        date: '2023-04-15',
-        total: 18.75,
-        items: 2,
-        status: 'completed',
-        orderType: 'Delivery',
-        products: [{ id: 105, name: 'Product E', quantity: 2, price: 9.375, image: 'placeholder' }],
-      },
-      {
-        id: 4,
-        date: '2023-04-20',
-        total: 65.3,
-        items: 7,
-        status: 'completed',
-        orderType: 'Pickup',
-        products: [
-          { id: 106, name: 'Product F', quantity: 4, price: 10.0, image: 'placeholder' },
-          { id: 107, name: 'Product G', quantity: 3, price: 11.1, image: 'placeholder' },
-        ],
-      },
-    ],
-    cancelled: [
-      {
-        id: 5,
-        date: '2023-04-10',
-        total: 32.45,
-        items: 4,
-        status: 'cancelled',
-        orderType: 'Delivery',
-        products: [{ id: 108, name: 'Product H', quantity: 4, price: 8.1125, image: 'placeholder' }],
-      },
-    ],
+    pending: [],
+    completed: [],
+    cancelled: [],
   });
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
