@@ -1,473 +1,385 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import React, { useCallback, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import qrImage from '../assets/qr.png';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './cart.css';
+import { CartContext } from '../contexts/CartContext';
 
-import './menu.css';
+const Cart = () => {
+  const navigate = useNavigate();
 
+  const { cartItems, incrementQuantity, decrementQuantity, removeFromCart } = useContext(CartContext);
 
-const MenuContent = () => {
-  const [products, setProducts] = useState({});
-  const [selectedCategory, setSelectedCategory] = useState('Drinks');
-  const [selectedSubcategory, setSelectedSubcategory] = useState('');
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [selectedCartItems, setSelectedCartItems] = useState([]);
 
-  
+  const [receiptFile, setReceiptFile] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [paymentMethodMain, setPaymentMethodMain] = useState('Cash');
+  const [orderTypeMain, setOrderTypeMain] = useState('Pick Up');
 
-   useEffect(() => {
-    const API_BASE_URL = "http://127.0.0.1:8001";
+  const [formData, setFormData] = useState({
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    address: '',
+    landmark: '',
+    contact: '',
+    email: '',
+  });
 
-    const fetchAllData = async () => {
-      const token = localStorage.getItem("authToken");
+  const [errors, setErrors] = useState({});
 
-      try {
-        if (token) {
-          const headers = { Authorization: `Bearer ${token}` };
+  // Function to handle checkbox change for individual items
+  const handleCheckboxChange = (item, checked) => {
+    if (checked) {
+      setSelectedCartItems(prev => [...prev, item]);
+    } else {
+      setSelectedCartItems(prev => prev.filter(ci => ci.ProductID !== item.ProductID));
+    }
+  };
 
-          const [typesResponse, productsResponse, productsDetailsResponse] = await Promise.all([
-            fetch(`${API_BASE_URL}/ProductType/`, { headers }),
-            fetch(`${API_BASE_URL}/is_products/products/`, { headers }),
-            fetch(`${API_BASE_URL}/is_products/products/details/`, { headers }),
-          ]);
+  // Function to handle select all checkbox
+  const handleSelectAllChange = (checked) => {
+    if (checked) {
+      setSelectedCartItems(cartItems);
+    } else {
+      setSelectedCartItems([]);
+    }
+  };
 
-          if (!typesResponse.ok || !productsResponse.ok || !productsDetailsResponse.ok) {
-            throw new Error("Failed to fetch all necessary data.");
-          }
+  const handleIncrement = (index) => {
+    const productId = cartItems[index].ProductID;
+    incrementQuantity(productId);
+  };
 
-          const apiTypes = await typesResponse.json();
-          const apiProducts = await productsResponse.json();
-          const apiProductsDetails = await productsDetailsResponse.json();
+  const handleDecrement = (index) => {
+    const productId = cartItems[index].ProductID;
+    decrementQuantity(productId);
+  };
 
-          const productStatusMap = apiProductsDetails.reduce((acc, detail) => {
-            acc[detail.ProductName] = detail.Status;
-            return acc;
-          }, {});
+  const handleRemove = (index) => {
+    const productId = cartItems[index].ProductID;
+    removeFromCart(productId);
+    setSelectedCartItems(prev => prev.filter(item => item.ProductID !== productId));
+  };
 
-          const transformedProducts = apiProducts.map((product) => ({
-            ...product,
-            Status: productStatusMap[product.ProductName] || "Available",
-          }));
+  const calculateTotal = (item) => item.ProductPrice * item.quantity;
+  const grandTotal = cartItems.reduce((acc, item) => acc + calculateTotal(item), 0);
 
-          const grouped = {};
-          apiTypes.forEach((type) => {
-            grouped[type.productTypeName] = {};
-          });
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setReceiptFile(e.target.files[0]);
+    }
+  };
 
-          transformedProducts.forEach((product) => {
-            const typeName = product.ProductTypeName || "Other";
-            const category = product.ProductCategory || "Other";
-            if (!grouped[typeName]) grouped[typeName] = {};
-            if (!grouped[typeName][category]) grouped[typeName][category] = [];
-            grouped[typeName][category].push(product);
-          });
-
-          setProducts(grouped);
-
-          if (grouped["Drinks"]) {
-            const firstSubcat = Object.keys(grouped["Drinks"])[0];
-            setSelectedSubcategory(firstSubcat || "");
-          } else {
-            setSelectedSubcategory("");
-          }
-        } else {
-          const publicResponse = await fetch(`${API_BASE_URL}/is_products/public/products/`);
-          if (!publicResponse.ok) throw new Error("Failed to fetch public product data.");
-          const publicProducts = await publicResponse.json();
-
-          const grouped = {};
-          publicProducts.forEach((product) => {
-            const typeName = product.ProductTypeName || "Other";
-            const category = product.ProductCategory || "Other";
-            if (!grouped[typeName]) grouped[typeName] = {};
-            if (!grouped[typeName][category]) grouped[typeName][category] = [];
-            grouped[typeName][category].push({
-              ...product,
-              Status: "Available",
-            });
-          });
-
-          setProducts(grouped);
-
-          if (grouped["Drinks"]) {
-            const firstSubcat = Object.keys(grouped["Drinks"])[0];
-            setSelectedSubcategory(firstSubcat || "");
-          } else {
-            setSelectedSubcategory("");
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        toast.error("Failed to load products");
-      }
-    };
-
-    fetchAllData();
+  const handleDrag = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
   }, []);
 
-  const handleCategoryClick = (category, subcategory) => {
-    setSelectedCategory(category);
-    setSelectedSubcategory(subcategory);
-    setSelectedItem(null);
-  };
-
-  const handleItemClick = (item) => {
-    setSelectedItem(item);
-    setShowModal(true);
-  };
-
-  const handleAddToCart = async () => {
-  if (!selectedItem) return;
-
-  const token = localStorage.getItem("authToken");
-  const userID = localStorage.getItem("userID"); // Store userID upon login if not yet
-
-  if (!token || !userID) {
-    toast.error("You must be logged in.");
-    return;
-  }
-
-  // Get selected options
-  const size = document.querySelector('input[name="size"]:checked')?.id?.replace("size-", "") || null;
-  const sugarLevel = document.querySelector('input[name="sugar-level"]:checked')?.id?.replace("sugar-", "") || null;
-  const orderType = document.querySelector('input[name="order-method"]:checked')?.id?.replace("method-", "") || "pickup";
-
-  const addons = [];
-  if (document.getElementById("espresso-shot")?.checked) addons.push("Espresso Shot");
-  if (document.getElementById("seasalt-cream")?.checked) addons.push("Seasalt Cream");
-  if (document.getElementById("syrup-sauces")?.checked) addons.push("Syrup/Sauces");
-
-  const cartItem = {
-    userID,
-    productID: selectedItem.ProductID,
-    sizeID: size,
-    sugarLevel,
-    quantity: 1,
-    addons,
-    orderType,
-  };
-
-  try {
-    const response = await fetch("http://localhost:7004/cart/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(cartItem)
-    });
-
-    if (!response.ok) throw new Error("Failed to add to cart");
-
-    toast.success(`${selectedItem.ProductName} added to cart!`);
-    handleClose();
-  } catch (error) {
-    console.error("Error adding to cart:", error);
-    toast.error("Failed to add item to cart");
-  }
-};
-
-  const handleBuyNow = () => {
-    if (selectedItem) toast.info(`Buying ${selectedItem.ProductName} now!`);
-  };
-
-  const handleClose = () => setShowModal(false);
-
-  const subcategories = products[selectedCategory] ? Object.keys(products[selectedCategory]) : [];
-
-  useEffect(() => {
-    if (selectedCategory && products[selectedCategory]) {
-      if (!selectedSubcategory || !subcategories.includes(selectedSubcategory)) {
-        setSelectedSubcategory(subcategories[0] || '');
-      }
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setReceiptFile(e.dataTransfer.files[0]);
     }
-  }, [selectedCategory, products]);
+  }, []);
 
-  const currentItems = (products[selectedCategory] && products[selectedCategory][selectedSubcategory]) || [];
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.address.trim()) newErrors.address = 'Address is required';
+    if (!formData.landmark.trim()) newErrors.landmark = 'Landmark is required';
+    if (!formData.contact.trim()) {
+      newErrors.contact = 'Contact number is required';
+    } else if (!/^\d{11}$/.test(formData.contact)) {
+      newErrors.contact = 'Contact number must be 11 digits';
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email address';
+    }
+
+    return newErrors;
+  };
+
+  const handleCheckoutClick = (e) => {
+    e.preventDefault();
+    // Remove validation and toast notifications to always navigate to checkout
+    navigate('/checkout');
+  };
+
+  const handleConfirmOrder = () => {
+    // Save order logic here (could be API call)
+    toast.success('Order confirmed! Redirecting...');
+    // Clear only cart items, keep form data and receipt file
+    // Note: cartItems are managed by context, so clearing should be done via context if needed
+    // For now, no clear function implemented, so just redirect
+    setSelectedCartItems([]);
+    // Redirect after 2 seconds
+    setTimeout(() => {
+      window.location.href = '/profile/orderhistory';
+    }, 2000);
+  };
 
   return (
-    <section className="menu-content-section">
-      <div className="menu-wrapper">
-        {/* Left Sidebar */}
-        <aside className="menu-sidebar">
-          <h2 className="menu-title">Menu</h2>
-          <div className="menu-category">
-            {Object.keys(products).map((productType) => (
-              <div key={productType}>
-                <h3>{productType}</h3>
-                <ul>
-                  {products[productType] &&
-                    Object.keys(products[productType]).map((subcat) => (
-                      <li
-                        key={subcat}
-                        onClick={() => handleCategoryClick(productType, subcat)}
-                        style={{ cursor: 'pointer', fontWeight: selectedCategory === productType && selectedSubcategory === subcat ? 'bold' : 'normal' }}
-                      >
-                        {subcat}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </aside>
-
-        {/* Right Side Content */}
-        <div className="menu-items">
-          {/* Search Bar */}
-          <div className="search-container w-100">
-            <div className="input-group" style={{ maxWidth: '500px' }}>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search Our Coffee, Merch"
-                // Search functionality not implemented as per user request
-              />
-              <button className="btn btn-primary" type="button">
-                🔍
-              </button>
+    <section className="container-fluid py-3 px-5 mt-5 pt-5" style={{ backgroundColor: '#eaf4f6', minHeight: '100vh' }}>
+      <div className="row">
+        {/* Cart Section */}
+        <div className="col-lg-8 mb-4">
+          <div className="bg-white p-4 shadow-sm" style={{ borderRadius: '20px' }}>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h3 className="fw-bold" style={{ color: '#4B929D' }}>Cart</h3>
+              <span className="fw-semibold">{cartItems.length} Items</span>
             </div>
-          </div>
+            <div className="table-responsive">
+              <table className="table align-middle" style={{ tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: '30px' }} /> {/* Checkbox column */}
+                  <col style={{ width: '25%' }} /> {/* Product */}
+                  <col style={{ width: '15%' }} /> {/* Quantity */}
+                  <col style={{ width: '15%' }} /> {/* Price */}
+                  <col style={{ width: '18%' }} /> {/* Total - increased width */}
+                  <col style={{ width: '17%' }} /> {/* Order Type - increased width */}
+                  <col style={{ width: '10%' }} /> {/* Actions - reduced width */}
+                </colgroup>
+                <thead>
+                  <tr style={{ color: '#4B929D', verticalAlign: 'middle' }}>
+                    <th style={{ verticalAlign: 'middle', textAlign: 'center', width: '30px', padding: '0 5px' }}>
+                      <input
+                        type="checkbox"
+                        style={{ margin: 0 }}
+                        onChange={(e) => handleSelectAllChange(e.target.checked)}
+                        checked={selectedCartItems.length === cartItems.length && cartItems.length > 0}
+                      />
+                    </th>
+                    <th style={{ verticalAlign: 'middle' }}>Product</th>
+                    <th style={{ verticalAlign: 'middle', textAlign: 'center' }}>Quantity</th>
+                    <th style={{ verticalAlign: 'middle', textAlign: 'right' }}>Price</th>
+                    <th style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '63px' }}>Total</th>
+                    <th style={{ verticalAlign: 'middle', paddingLeft: '20px' }}>Order Type</th>
+                    <th style={{ verticalAlign: 'middle' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartItems.map((item, i) => (
+                    <tr key={i}>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'center', width: '30px', padding: '0 5px' }}>
+                        <input
+                          type="checkbox"
+                          style={{ margin: 0 }}
+                          onChange={(e) => handleCheckboxChange(item, e.target.checked)}
+                          checked={selectedCartItems.some(ci => ci.ProductID === item.ProductID)}
+                        />
+                      </td>
+                      <td style={{ verticalAlign: 'middle' }}>
+                        <div className="d-flex align-items-center">
+                          <img
+                            src={item.ProductImage ? (item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`) : "https://via.placeholder.com/60"}
+                            alt={item.ProductName}
+                            className="img-fluid me-2 rounded"
+                            style={{ height: '60px', width: '60px', objectFit: 'cover' }}
+                          />
+                          <div>
+                            <div className="fw-semibold">{item.ProductName}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+                        <div className="d-flex align-items-center justify-content-center">
+                          <button
+                            className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                            style={{
+                              backgroundColor: '#4B929D',
+                              color: 'white',
+                              border: 'none',
+                              width: '30px',
+                              height: '30px',
+                              padding: '0',
+                            }}
+                            onClick={() => handleDecrement(i)}
+                          >
+                            -
+                          </button>
+                          <span className="mx-2" style={{ minWidth: '20px', textAlign: 'center' }}>
+                            {item.quantity}
+                          </span>
+                          <button
+                            className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                            style={{
+                              backgroundColor: '#4B929D',
+                              color: 'white',
+                              border: 'none',
+                              width: '30px',
+                              height: '30px',
+                              padding: '0',
+                            }}
+                            onClick={() => handleIncrement(i)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'right' }}>₱{item.ProductPrice.toFixed(2)}</td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '50px' }}>₱{calculateTotal(item).toFixed(2)}</td>
+                      <td style={{ verticalAlign: 'middle', paddingLeft: '20px' }}>{item.orderType}</td>
+                      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+                        <button
+                          className="btn btn-link text-danger p-0"
+                          onClick={() => handleRemove(i)}
+                        >
+                          <i className="bi bi-trash" style={{ fontSize: '1.2rem' }}></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
 
-          {/* Breadcrumbs */}
-          <nav aria-label="breadcrumb" className="mt-3 mb-4">
-            <ol className="breadcrumb">
-              <li className="breadcrumb-item">Menu</li>
-              {selectedCategory && <li className="breadcrumb-item">{selectedCategory}</li>}
-              {selectedSubcategory && <li className="breadcrumb-item">{selectedSubcategory}</li>}
-              {selectedItem && <li className="breadcrumb-item active" aria-current="page">{selectedItem.ProductName}</li>}
-            </ol>
-          </nav>
-
-          {/* Item Grid */}
-          <div className="items-grid">
-            {currentItems.map((item) => (
-              <div
-                className="item-card"
-                key={item.ProductID}
-                onClick={() => handleItemClick(item)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="item-image-placeholder">
-{item.ProductImage ? <img src={item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`} alt={item.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'Image'}
-                </div>
-                <div className="item-name-placeholder">{item.ProductName}</div>
-              </div>
-            ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        {/* Modal for Item Details */}
-        <Modal show={showModal} onHide={handleClose} centered size="lg">
-          <Modal.Header closeButton>
-            <Modal.Title>{selectedItem ? selectedItem.ProductName : ''}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {selectedItem && (
-              <div className="container">
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="modal-image-placeholder">
-                      <div className="d-flex align-items-center justify-content-center h-100 bg-light">
-{selectedItem.ProductImage ? (
-  <img src={selectedItem.ProductImage.startsWith('http') ? selectedItem.ProductImage : `http://localhost:8001${selectedItem.ProductImage}`} alt={selectedItem.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-) : (
-  <span className="text-muted">Item Image</span>
-)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <h4 style={{ color: '#4b929d' }}>{selectedItem.ProductName}</h4>
-                    <p className="text-muted">{selectedItem.ProductDescription}</p>
-                    <p className="h5" style={{ textAlign: 'left' }}>₱{selectedItem.ProductPrice}</p>
 
-                    {/* Horizontal Group for Size and Type */}
-                    <div className="row mt-4">
-                      {/* Size Selection */}
-                      <div className="col-md-6">
-                        <h6>Size:</h6>
-                        <div className="btn-group w-100" role="group">
-                          <input
-                            type="radio"
-                            className="btn-check"
-                            name="size"
-                            id="size-12oz"
-                            autoComplete="off"
-                            defaultChecked
-                          />
-                          <label className="btn btn-outline-secondary" htmlFor="size-12oz">
-                            12oz
-                          </label>
-
-                          <input
-                            type="radio"
-                            className="btn-check"
-                            name="size"
-                            id="size-16oz"
-                            autoComplete="off"
-                          />
-                          <label className="btn btn-outline-secondary" htmlFor="size-16oz">
-                            16oz
-                          </label>
-                        </div>
-                      </div>
-
-                      {/* Type Selection */}
-                      <div className="col-md-6">
-                        <h6>Type:</h6>
-                        <div className="btn-group w-100" role="group">
-                          <input
-                            type="radio"
-                            className="btn-check"
-                            name="type"
-                            id="type-hot"
-                            autoComplete="off"
-                            defaultChecked
-                          />
-                          <label className="btn btn-outline-secondary" htmlFor="type-hot">
-                            Hot
-                          </label>
-
-                          <input
-                            type="radio"
-                            className="btn-check"
-                            name="type"
-                            id="type-cold"
-                            autoComplete="off"
-                          />
-                          <label className="btn btn-outline-secondary" htmlFor="type-cold">
-                            Cold
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Sugar Level */}
-                    <div className="mt-3">
-                      <h6>Sugar Level:</h6>
-                      <div className="btn-group w-100" role="group">
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="sugar-level"
-                          id="sugar-none"
-                          autoComplete="off"
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="sugar-none">
-                          No sugar
-                        </label>
-
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="sugar-level"
-                          id="sugar-low"
-                          autoComplete="off"
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="sugar-low">
-                          5%
-                        </label>
-
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="sugar-level"
-                          id="sugar-medium"
-                          autoComplete="off"
-                          defaultChecked
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="sugar-medium">
-                          50%
-                        </label>
-
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="sugar-level"
-                          id="sugar-high"
-                          autoComplete="off"
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="sugar-high">
-                          100%
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Add-ons */}
-                    <div className="mt-3">
-                      <h6>Adds on:</h6>
-                      <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="espresso-shot" />
-                        <label className="form-check-label" htmlFor="espresso-shot">
-                          Espresso Shot ₱50
-                        </label>
-                      </div>
-                      <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="seasalt-cream" />
-                        <label className="form-check-label" htmlFor="seasalt-cream">
-                          Seasalt cream ₱30
-                        </label>
-                      </div>
-                      <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="syrup-sauces" />
-                        <label className="form-check-label" htmlFor="syrup-sauces">
-                          Syrup/Sauces ₱50
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Order Method */}
-                    <div className="mt-4">
-                      <h6>Order method:</h6>
-                      <div className="btn-group w-100" role="group">
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="order-method"
-                          id="method-pickup"
-                          autoComplete="off"
-                          defaultChecked
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="method-pickup">
-                          Pickup
-                        </label>
-
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="order-method"
-                          id="method-delivery"
-                          autoComplete="off"
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="method-delivery">
-                          Delivery
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        {/* Pay Online Section */}
+        <div className="col-lg-4">
+          <div className="bg-white p-4 shadow-sm" style={{ borderRadius: '20px' }}>
+            <h5 className="fw-bold mb-3 text-center">Order Details</h5>
+            <div className="d-flex justify-content-center">
+              <div className="btn-group-toggle btn-group-toggle-center" role="group" aria-label="Order Type Toggle">
+                <button
+                  type="button"
+                  className={`${orderTypeMain === 'Pick Up' ? 'btn-active-custom' : ''}`}
+                  style={{ minWidth: '120px', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
+                  onClick={() => setOrderTypeMain('Pick Up')}
+                >
+                  <i className="bi bi-bag-fill"></i>
+                  Pick Up
+                </button>
+                <button
+                  type="button"
+                  className={`${orderTypeMain === 'Delivery' ? 'btn-active-custom' : ''}`}
+                  style={{ minWidth: '120px', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
+                  onClick={() => setOrderTypeMain('Delivery')}
+                >
+                  <i className="bi bi-truck"></i>
+                  Delivery
+                </button>
               </div>
-            )}
-          </Modal.Body>
-          <Modal.Footer className="justify-content-between">
-            <Button variant="outline-secondary" onClick={handleClose}>
-              Close
-            </Button>
-            <div>
-              <Button variant="outline-primary" className="me-2" onClick={handleAddToCart}>
-                Add to cart
-              </Button>
-              <Button variant="primary" onClick={handleBuyNow}>
-                Buy Now
-              </Button>
             </div>
-          </Modal.Footer>
-        </Modal>
-        <ToastContainer position="top-center" autoClose={2000} hideProgressBar />
+            <div className="mt-4" style={{ backgroundColor: '#eaf4f6' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '8px' }}>Product</th>
+                    <th style={{ textAlign: 'center', padding: '8px' }}>Quantity</th>
+                    <th style={{ textAlign: 'right', padding: '8px' }}>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedCartItems.map((item, i) => (
+                    <tr key={i}>
+                              {item.ProductName}
+                      <td style={{ textAlign: 'center', padding: '8px' }}>{item.quantity}</td>
+                      <td style={{ textAlign: 'right', padding: '8px' }}>₱{item.ProductPrice.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="subtotal-row">
+                    <td style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Subtotal</td>
+                    <td></td>
+                    <td style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>
+                      ₱{selectedCartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)}
+                    </td>
+                  </tr>
+                  {orderTypeMain === 'Delivery' && (
+                    <tr className="delivery-fee-row subtotal-row">
+                      <td style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Delivery Fee</td>
+                      <td></td>
+                      <td style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>
+                        ₱50.00
+                      </td>
+                    </tr>
+                  )}
+                  <tr className="total-row">
+                    <td style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Total</td>
+                    <td></td>
+                    <td style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>
+                      ₱{(selectedCartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) + (orderTypeMain === 'Delivery' ? 50 : 0)).toFixed(2)}
+                    </td>
+                  </tr>
+                  <tr className="payment-method-row">
+                    <td colSpan="3" style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Payment Method</td>
+                  </tr>
+                  <tr>
+                    <td colSpan="3" style={{ padding: '8px', verticalAlign: 'middle', textAlign: 'center' }}>
+                      <div className="btn-group-toggle mt-2" style={{ margin: '0 auto' }}>
+                        <button
+                          type="button"
+                          className={`d-flex align-items-center justify-content-center ${paymentMethodMain === 'Cash' ? 'btn-active-custom' : ''}`}
+                          style={{ minWidth: '120px' }}
+                          onClick={() => setPaymentMethodMain('Cash')}
+                        >
+                          <i className="bi bi-cash-stack"></i>
+                          Cash
+                        </button>
+                        <button
+                          type="button"
+                          className={`d-flex align-items-center justify-content-center ${paymentMethodMain === 'E-Wallet' ? 'btn-active-custom' : ''}`}
+                          style={{ minWidth: '120px' }}
+                          onClick={() => setPaymentMethodMain('E-Wallet')}
+                        >
+                          <i className="bi bi-wallet2"></i>
+                          E-Wallet
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan="3" style={{ padding: '8px', verticalAlign: 'middle' }}>
+                      <div className="d-flex justify-content-center mt-3">
+                        <button
+                          type="button"
+                          className="btn"
+                          style={{ minWidth: '200px', backgroundColor: '#4B929D', color: 'white' }}
+                          onClick={handleCheckoutClick}
+                        >
+                          <i className="bi bi-cart-check me-2"></i>
+                          Checkout
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
+      <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} />
     </section>
   );
 };
 
-export default MenuContent;
+export default Cart;

@@ -7,6 +7,8 @@ from typing import Optional
 
 router = APIRouter()
 
+
+
 @router.post('/create', dependencies=[Depends(role_required(["superadmin"]))])
 async def create_user(
     firstName: str = Form(...),
@@ -17,6 +19,12 @@ async def create_user(
     password: str = Form(...), 
     email: str = Form(...), 
     phoneNumber: Optional[str] = Form(None),
+    city: Optional[str] = Form('Unknown'),
+    province: Optional[str] = Form('Unknown'),
+    landmark: Optional[str] = Form('N/A'),
+    block: Optional[str] = Form(None),
+    street: Optional[str] = Form(None),
+    subdivision: Optional[str] = Form(None),
     userRole: str = Form(...),
     system: str = Form(...),
 
@@ -48,9 +56,9 @@ async def create_user(
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         
         await cursor.execute('''
-            INSERT INTO Users (UserPassword, Email, UserRole, isDisabled, CreatedAt, System, Username, PhoneNumber, FirstName, MiddleName, LastName, Suffix)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (hashed_password, email, userRole, 0, datetime.utcnow(), system, username, phoneNumber, firstName, middleName, lastName, suffix))
+            INSERT INTO Users (UserPassword, Email, UserRole, isDisabled, CreatedAt, System, Username, PhoneNumber, FirstName, MiddleName, LastName, Suffix, City, Province, Landmark, Block, Street, Subdivision)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (hashed_password, email, userRole, 0, datetime.utcnow(), system, username, phoneNumber, firstName, middleName, lastName, suffix, city, province, landmark, block, street, subdivision))
         await conn.commit()
 
     except HTTPException: 
@@ -116,6 +124,12 @@ async def update_user(
     password: Optional[str] = Form(None), 
     email: Optional[str] = Form(None),
     phoneNumber: Optional[str] = Form(None),
+    city: Optional[str] = Form(None),
+    province: Optional[str] = Form(None),
+    landmark: Optional[str] = Form(None),
+    block: Optional[str] = Form(None),
+    street: Optional[str] = Form(None),
+    subdivision: Optional[str] = Form(None),
 ):
     conn = None
     cursor = None
@@ -138,8 +152,35 @@ async def update_user(
             values.append(email)
         
         if phoneNumber is not None:
+            # Truncate phoneNumber to max length allowed by DB column (assumed 13 chars)
+            max_phone_length = 13
+            truncated_phone = phoneNumber[:max_phone_length]
             updates.append('PhoneNumber = ?')
-            values.append(phoneNumber)
+            values.append(truncated_phone)
+
+        if city is not None:
+            updates.append('City = ?')
+            values.append(city)
+
+        if province is not None:
+            updates.append('Province = ?')
+            values.append(province)
+
+        if landmark is not None:
+            updates.append('Landmark = ?')
+            values.append(landmark)
+
+        if block is not None:
+            updates.append('Block = ?')
+            values.append(block)
+
+        if street is not None:
+            updates.append('Street = ?')
+            values.append(street)
+
+        if subdivision is not None:
+            updates.append('Subdivision = ?')
+            values.append(subdivision)
 
         if password:
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -255,3 +296,137 @@ async def signup_oos_user(
         if conn: await conn.close()
 
     return {'message': 'OOS user account created successfully!'}
+
+@router.get('/profile')
+async def get_user_profile(current_user=Depends(get_current_active_user)):
+    username = current_user.username
+    conn = None
+    cursor = None
+    try:
+        conn = await get_db_connection()
+        cursor = await conn.cursor()
+        await cursor.execute('''
+            SELECT UserID, Username, FirstName, MiddleName, LastName, Email, PhoneNumber, City, Province, Landmark, Block, Street, Subdivision
+            FROM Users
+            WHERE Username = ? AND isDisabled = 0
+        ''', (username,))
+        user = await cursor.fetchone()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return {
+            "userID": user[0],
+            "username": user[1],
+            "firstName": user[2],
+            "middleName": user[3],
+            "lastName": user[4],
+            "email": user[5],
+            "phone": user[6],
+            "city": user[7],
+            "province": user[8],
+            "landmark": user[9],
+            "block": user[10],
+            "street": user[11],
+            "subdivision": user[12]
+        }
+    except Exception as e:
+        print(f"Error fetching user profile: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch user profile")
+    finally:
+        if cursor:
+            await cursor.close()
+        if conn:
+            await conn.close()
+@router.put('/profile/update')
+async def update_own_profile(
+    username: Optional[str] = Form(None),
+    firstName: Optional[str] = Form(None),
+    lastName: Optional[str] = Form(None),
+    block: Optional[str] = Form(None),
+    street: Optional[str] = Form(None),
+    subdivision: Optional[str] = Form(None),
+    city: Optional[str] = Form(None),
+    province: Optional[str] = Form(None),
+    landmark: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),
+    phoneNumber: Optional[str] = Form(None),
+    current_user=Depends(get_current_active_user)
+):
+    user_id = current_user.userID
+    if user_id is None:
+        raise HTTPException(status_code=400, detail="User ID not found in token")
+    conn = None
+    cursor = None
+    try:
+        conn = await get_db_connection()
+        cursor = await conn.cursor()
+        await cursor.execute("SELECT UserRole FROM Users WHERE UserID = ?", (user_id,))
+        if not await cursor.fetchone():
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        updates = []
+        values = []
+
+        if email:
+            await cursor.execute("SELECT 1 FROM Users WHERE Email = ? AND UserID != ? AND isDisabled = 0", (email, user_id))
+            if await cursor.fetchone():
+                raise HTTPException(status_code=400, detail="Email is already used by another user")
+            updates.append('Email = ?')
+            values.append(email)
+        
+        if phoneNumber is not None:
+            updates.append('PhoneNumber = ?')
+            values.append(phoneNumber)
+
+        if city is not None:
+            updates.append('City = ?')
+            values.append(city)
+
+        if province is not None:
+            updates.append('Province = ?')
+            values.append(province)
+
+        if landmark is not None:
+            updates.append('Landmark = ?')
+            values.append(landmark)
+
+        if block is not None:
+            updates.append('Block = ?')
+            values.append(block)
+
+        if street is not None:
+            updates.append('Street = ?')
+            values.append(street)
+
+        if subdivision is not None:
+            updates.append('Subdivision = ?')
+            values.append(subdivision)
+
+        if firstName is not None:
+            updates.append('FirstName = ?')
+            values.append(firstName)
+
+        if lastName is not None:
+            updates.append('LastName = ?')
+            values.append(lastName)
+
+        if username is not None:
+            updates.append('Username = ?')
+            values.append(username)
+
+        if not updates:
+            return {'message': 'No fields to update'}
+
+        values.append(user_id)
+        
+        await cursor.execute(f"UPDATE Users SET {', '.join(updates)} WHERE UserID = ?", tuple(values))
+        await conn.commit()
+                
+    except HTTPException: raise
+    except Exception as e:
+        print(f"Error in update_own_profile: {e}")
+        raise HTTPException(status_code=500, detail="An internal server error occurred during user update.")
+    finally:
+        if cursor: await cursor.close()
+        if conn: await conn.close()
+
+    return {'message': 'User updated successfully'}
