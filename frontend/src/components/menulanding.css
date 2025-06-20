@@ -99,7 +99,105 @@
   background-color: #3a7b84;
 }
 
-/* 🔽 Responsive Styles Below */
+
+.item-card {
+  position: relative; /* Crucial for positioning the overlay */
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden; /* Ensures content stays within the rounded corners */
+  transition: box-shadow 0.3s ease;
+}
+
+.item-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.item-image-placeholder {
+  width: 100%;
+  padding-top: 100%; /* Creates a square aspect ratio */
+  position: relative;
+  background-color: #f0f0f0;
+}
+
+.item-image-placeholder img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-name-placeholder {
+  padding: 12px 16px;
+  font-weight: 600;
+  text-align: center;
+  color: #333;
+}
+
+/* Style the card when it's unavailable */
+.item-card.unavailable .item-image-placeholder img {
+  filter: grayscale(100%) brightness(0.7);
+  transition: filter 0.3s ease;
+}
+
+.item-card.unavailable .item-name-placeholder {
+  color: #999; /* Dim the text color for unavailable items */
+}
+
+/* The overlay itself */
+.unavailable-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(40, 40, 40, 0.6); /* Dark, semi-transparent background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px; /* Match your item-card's border-radius */
+  pointer-events: none; /* Important: allows hover effects on the card if any */
+  z-index: 1;
+}
+
+/* The text inside the overlay */
+.unavailable-overlay span {
+  color: white;
+  font-size: 1.5rem; /* Adjust size as needed */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 2px solid white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Style for the active sidebar category */
+.menu-category li {
+  cursor: pointer;
+  padding: 5px 10px;
+  margin: 2px 0;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.menu-category li:hover {
+    background-color: #f0f0f0;
+}
+
+.menu-category li.active {
+  font-weight: bold;
+  background-color: #4B929D;
+  color: white;
+}
+
+
+
 
 @media (max-width: 1024px) {
   .menu-title {
@@ -169,6 +267,11 @@
   .card-info {
     font-size: 0.8rem;
     padding: 0 0.5rem;
+  }
+
+  .unavailable-overlay span {
+    font-size: 1.2rem;
+    padding: 6px 12px;
   }
 }
 

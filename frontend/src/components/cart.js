@@ -64,7 +64,7 @@ const Cart = () => {
     setSelectedCartItems(prev => prev.filter(item => item.product_id !== productId));
   };
 
-  const calculateTotal = (item) => item.price * item.quantity;
+  const calculateTotal = (item) => item.ProductPrice * item.quantity;
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -119,9 +119,20 @@ const Cart = () => {
   };
 
   const handleCheckoutClick = (e) => {
-    e.preventDefault();
-    navigate('/checkout');
-  };
+  e.preventDefault();
+  if (selectedCartItems.length === 0) {
+    toast.error("Please select items to checkout.");
+    return;
+  }
+
+  navigate('/checkout', {
+    state: {
+      cartItems: selectedCartItems,
+      orderType: orderTypeMain,
+      paymentMethod: paymentMethodMain
+    }
+  });
+};
 
   const handleConfirmOrder = () => {
     toast.success('Order confirmed! Redirecting...');
@@ -299,7 +310,7 @@ const Cart = () => {
                     <td style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Subtotal</td>
                     <td></td>
                     <td style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>
-                      ₱{selectedCartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)}
+                      ₱{selectedCartItems.reduce((acc, item) => acc + item.ProductPrice * item.quantity, 0).toFixed(2)}
                     </td>
                   </tr>
                   {orderTypeMain === 'Delivery' && (
@@ -315,7 +326,6 @@ const Cart = () => {
                     <td style={{ padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>Total</td>
                     <td></td>
                     <td style={{ textAlign: 'right', padding: '8px', fontWeight: 'bold', verticalAlign: 'middle' }}>
-                      ₱{(selectedCartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) + (orderTypeMain === 'Delivery' ? 50 : 0)).toFixed(2)}
                     </td>
                   </tr>
                   <tr className="payment-method-row">

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const CheckoutPage = () => {
+  const location = useLocation();
+  const { cartItems = [], orderType = 'Pick Up', paymentMethod = 'Cash' } = location.state || {};
+
   const [userData, setUserData] = useState({
     firstName: '',
     middleName: '',
@@ -50,29 +54,59 @@ const CheckoutPage = () => {
     fetchUserProfile();
   }, []);
 
+  const calculateTotal = () => {
+    const subtotal = cartItems.reduce((acc, item) => acc + item.ProductPrice * item.quantity, 0);
+    const deliveryFee = orderType === 'Delivery' ? 50 : 0;
+    return subtotal + deliveryFee;
+  };
+
   return (
     <div className="container py-5" style={{ minHeight: '100vh', marginTop: '100px' }}>
       <div className="bg-white p-4 rounded">
         <h2 className="mb-4" style={{ color: '#4B929D', textAlign: 'left' }}>Checkout</h2>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Size</th>
-                <th>Type</th>
-                <th>Sugar Level</th>
-                <th>Add-ons</th>
-                <th>Delivery Method</th>
-                <th>Payment Method</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colSpan="8" style={{ height: '200px' }}></td>
-              </tr>
-            </tbody>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Size</th>
+              <th>Type</th>
+              <th>Sugar Level</th>
+              <th>Add-ons</th>
+              <th>Delivery Method</th>
+              <th>Payment Method</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cartItems.length === 0 ? (
+              <tr><td colSpan="8" className="text-center">No items in cart.</td></tr>
+            ) : (
+              cartItems.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.ProductName}</td>
+                  <td>{item.size || '-'}</td>
+                  <td>{item.type || '-'}</td>
+                  <td>{item.sugarLevel || '-'}</td>
+                  <td>{item.addOns?.join(', ') || '-'}</td>
+                  <td>{orderType}</td>
+                  <td>{paymentMethod}</td>
+                  <td>₱{(item.ProductPrice * item.quantity).toFixed(2)}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan="7" style={{ textAlign: 'right', fontWeight: 'bold' }}>Delivery Fee:</td>
+              <td>₱{orderType === 'Delivery' ? '50.00' : '0.00'}</td>
+            </tr>
+            <tr>
+              <td colSpan="7" style={{ textAlign: 'right', fontWeight: 'bold' }}>Grand Total:</td>
+              <td>₱{calculateTotal().toFixed(2)}</td>
+            </tr>
+          </tfoot>
         </table>
+
         <div className="mt-4 p-3 bg-white rounded">
           <h2 className="mb-4" style={{ color: '#4B929D', textAlign: 'left' }}>Delivery Information</h2>
           <h6 style={{ color: '#4B929D', textAlign: 'left' }}>All fields are required</h6>
