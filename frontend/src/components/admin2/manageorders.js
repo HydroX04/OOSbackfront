@@ -3,7 +3,7 @@ import { Container, Row, Col, Table, Form, Modal, Button } from "react-bootstrap
 import { CartFill, BellFill, PersonFill, Search, EyeFill, PencilFill, TrashFill, PrinterFill } from "react-bootstrap-icons";
 import { FaChevronDown, FaBell, FaAngleLeft, FaAngleRight, FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import "../admin2/manageorder.css";
-
+import { FaSignOutAlt, FaUndo } from "react-icons/fa";
 const ManageOrders = () => {
   const userRole = "Admin";
   const userName = "Lim Alcovendas";
@@ -133,12 +133,26 @@ const ManageOrders = () => {
               <div className="dropdown-icon" onClick={() => setDropdownOpen(!dropdownOpen)}><FaChevronDown /></div>
               <div className="bell-icon"><FaBell className="bell-outline" /></div>
               {dropdownOpen && (
-                <div className="profile-dropdown">
-                  <ul>
-                    <li>Edit Profile</li>
-                    <li onClick={() => { localStorage.removeItem("access_token"); window.location.href = "/login"; }} style={{ cursor: "pointer" }}>Logout</li>
-                  </ul>
-                </div>
+<div className="profile-dropdown" style={{ position: "absolute", top: "100%", right: 0, backgroundColor: "white", border: "1px solid #ccc", borderRadius: "4px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", zIndex: 1000, width: "150px" }}>
+                                    <ul style={{ listStyle: "none", margin: 0, padding: "8px 0" }}>
+                                      <li
+                                        onClick={() => window.location.reload()}
+                                        style={{ cursor: "pointer", padding: "8px 16px", display: "flex", alignItems: "center", gap: "8px", color: "#4b929d" }}
+                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f0f0f0"}
+                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+                                      >
+                                        <FaUndo /> Refresh
+                                      </li>
+                                      <li
+                                        onClick={() => { localStorage.removeItem("access_token"); window.location.href = "http://localhost:4002/"; }}
+                                        style={{ cursor: "pointer", padding: "8px 16px", display: "flex", alignItems: "center", gap: "8px", color: "#dc3545" }}
+                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f8d7da"}
+                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+                                      >
+                                        <FaSignOutAlt /> Logout
+                                      </li>
+                                    </ul>
+                    </div>
               )}
             </div>
           </div>
