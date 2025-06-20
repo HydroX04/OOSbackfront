@@ -1,10 +1,10 @@
 import aioodbc
 
 # database config
-server = 'DESKTOP-FH6B6B4\SQLEXPRESS'
-database = 'OOS'
-username = 'imsadmin'
-password = 'imsadmin'
+server = 'DESKTOP-D84FNH8'
+database = 'retailAuth'
+username = 'sa'
+password = 'markregie123'
 driver = 'ODBC Driver 17 for SQL Server'
 
 # async function to get db connection

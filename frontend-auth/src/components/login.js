@@ -113,7 +113,6 @@ const LoginPage = () => {
         const { access_token } = data;
 
         localStorage.setItem('authToken', access_token);
-        localStorage.setItem('username', trimmedUsername);
         
         toast.success('Login successful!', {
           position: 'top-right',
