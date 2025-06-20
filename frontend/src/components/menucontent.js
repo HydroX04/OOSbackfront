@@ -130,45 +130,57 @@ useEffect(() => {
 
   const handleAddToCart = async () => {
     if (selectedItem) {
-      const token = localStorage.getItem("authToken") || localStorage.getItem("token");
-      if (!token) {
-        toast.error("You must be logged in to add to cart.");
-        return;
-      }
-
-      // Decode username from JWT token
-      const user = localStorage.getItem("user");
-if (!user) {
-  toast.error("You must be logged in to add to cart.");
-  return;
-}
-
-      try {
-        const response = await axios.post("http://localhost:7004/cart", {
-          username: user,
-          product_id: selectedItem.ProductID,
-          product_name: selectedItem.ProductName,
-          quantity: 1,
-          price: selectedItem.ProductPrice,
-          size: null,
-          type: selectedItem.ProductTypeName,
-          sugar_level: null,
-          add_ons: null,
-          order_type: "Pick Up"
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        toast.success(`${selectedItem.ProductName} added to cart!`);
-        addToContextCart(selectedItem);
-      } catch (error) {
-        console.error("Add to cart failed:", error);
-        toast.error("Failed to add to cart.");
-      }
+    const token = localStorage.getItem("authToken") || localStorage.getItem("token");
+    if (!token) {
+      toast.error("You must be logged in to add to cart.");
+      return;
     }
-  };
+
+    // Decode username from JWT
+    let user = null;
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const payload = JSON.parse(jsonPayload);
+      user = payload.username || payload.sub || null;
+    } catch (e) {
+      console.error("Failed to decode token:", e);
+    }
+
+    if (!user) {
+      toast.error("You must be logged in to add to cart.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:7004/cart", {
+        username: user,
+        product_id: selectedItem.ProductID,
+        product_name: selectedItem.ProductName,
+        quantity: 1,
+        price: selectedItem.ProductPrice,
+        size: null,
+        type: selectedItem.ProductTypeName,
+        sugar_level: null,
+        add_ons: null,
+        order_type: "Pick Up"
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      toast.success(`${selectedItem.ProductName} added to cart!`);
+      addToContextCart(selectedItem);
+    } catch (error) {
+      console.error("Add to cart failed:", error);
+      toast.error("Failed to add to cart.");
+    }
+  }
+};
 
   const handleBuyNow = () => {
     if (selectedItem) toast.info(`Buying ${selectedItem.ProductName} now!`);

@@ -99,9 +99,11 @@ async def add_to_cart(item: CartItem, token: str = Depends(oauth2_scheme)):
     cursor = await conn.cursor()
     try:
         logger.info(f"Adding to cart: {item}")
+        from datetime import datetime
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         await cursor.execute("""
             INSERT INTO Cart (Username, ProductID, ProductName, Quantity, Price, Size, Type, SugarLevel, AddOns, OrderType, Status, CreatedAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_cart', GETDATE())
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_cart', ?)
         """, (
             item.username,
             item.product_id,
@@ -112,7 +114,8 @@ async def add_to_cart(item: CartItem, token: str = Depends(oauth2_scheme)):
             item.type,
             item.sugar_level,
             item.add_ons,
-            item.order_type
+            item.order_type,
+            current_time
         ))
         await conn.commit()
     except Exception as e:
