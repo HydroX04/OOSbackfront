@@ -211,9 +211,14 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username, "role": user.userRole, "system": user.system},
-        expires_delta=access_token_expires
-    )
+    data={
+        "sub": user.username,             # standard claim
+        "username": user.username,        # custom claim for frontend use
+        "role": user.userRole,
+        "system": user.system
+    },
+    expires_delta=access_token_expires
+)
     
     print("Authentication successful for:", user.username)
     return {"access_token": access_token, "token_type": "bearer"}
