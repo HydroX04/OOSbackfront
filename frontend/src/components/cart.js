@@ -32,16 +32,14 @@ const Cart = () => {
 
   const [errors, setErrors] = useState({});
 
-  // Function to handle checkbox change for individual items
   const handleCheckboxChange = (item, checked) => {
     if (checked) {
       setSelectedCartItems(prev => [...prev, item]);
     } else {
-      setSelectedCartItems(prev => prev.filter(ci => ci.ProductID !== item.ProductID));
+      setSelectedCartItems(prev => prev.filter(ci => ci.product_id !== item.product_id));
     }
   };
 
-  // Function to handle select all checkbox
   const handleSelectAllChange = (checked) => {
     if (checked) {
       setSelectedCartItems(cartItems);
@@ -51,23 +49,22 @@ const Cart = () => {
   };
 
   const handleIncrement = (index) => {
-    const productId = cartItems[index].ProductID;
+    const productId = cartItems[index].product_id;
     incrementQuantity(productId);
   };
 
   const handleDecrement = (index) => {
-    const productId = cartItems[index].ProductID;
+    const productId = cartItems[index].product_id;
     decrementQuantity(productId);
   };
 
   const handleRemove = (index) => {
-    const productId = cartItems[index].ProductID;
+    const productId = cartItems[index].product_id;
     removeFromCart(productId);
-    setSelectedCartItems(prev => prev.filter(item => item.ProductID !== productId));
+    setSelectedCartItems(prev => prev.filter(item => item.product_id !== productId));
   };
 
-  const calculateTotal = (item) => item.ProductPrice * item.quantity;
-  const grandTotal = cartItems.reduce((acc, item) => acc + calculateTotal(item), 0);
+  const calculateTotal = (item) => item.price * item.quantity;
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -104,7 +101,6 @@ const Cart = () => {
 
   const validate = () => {
     const newErrors = {};
-
     if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
     if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
     if (!formData.address.trim()) newErrors.address = 'Address is required';
@@ -119,24 +115,17 @@ const Cart = () => {
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Invalid email address';
     }
-
     return newErrors;
   };
 
   const handleCheckoutClick = (e) => {
     e.preventDefault();
-    // Remove validation and toast notifications to always navigate to checkout
     navigate('/checkout');
   };
 
   const handleConfirmOrder = () => {
-    // Save order logic here (could be API call)
     toast.success('Order confirmed! Redirecting...');
-    // Clear only cart items, keep form data and receipt file
-    // Note: cartItems are managed by context, so clearing should be done via context if needed
-    // For now, no clear function implemented, so just redirect
     setSelectedCartItems([]);
-    // Redirect after 2 seconds
     setTimeout(() => {
       window.location.href = '/profile/orderhistory';
     }, 2000);
@@ -269,7 +258,7 @@ const Cart = () => {
               <div className="btn-group-toggle btn-group-toggle-center" role="group" aria-label="Order Type Toggle">
                 <button
                   type="button"
-                  className={${orderTypeMain === 'Pick Up' ? 'btn-active-custom' : ''}}
+                  className={`${orderTypeMain === 'Pick Up' ? 'btn-active-custom' : ''}`}
                   style={{ minWidth: '120px', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
                   onClick={() => setOrderTypeMain('Pick Up')}
                 >
@@ -278,7 +267,7 @@ const Cart = () => {
                 </button>
                 <button
                   type="button"
-                  className={${orderTypeMain === 'Delivery' ? 'btn-active-custom' : ''}}
+                  className={`${orderTypeMain === 'Delivery' ? 'btn-active-custom' : ''}`}
                   style={{ minWidth: '120px', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
                   onClick={() => setOrderTypeMain('Delivery')}
                 >
@@ -337,7 +326,7 @@ const Cart = () => {
                       <div className="btn-group-toggle mt-2" style={{ margin: '0 auto' }}>
                         <button
                           type="button"
-                          className={d-flex align-items-center justify-content-center ${paymentMethodMain === 'Cash' ? 'btn-active-custom' : ''}}
+                          className={`d-flex align-items-center justify-content-center ${paymentMethodMain === 'Cash' ? 'btn-active-custom' : ''}`}
                           style={{ minWidth: '120px' }}
                           onClick={() => setPaymentMethodMain('Cash')}
                         >
@@ -346,7 +335,7 @@ const Cart = () => {
                         </button>
                         <button
                           type="button"
-                          className={d-flex align-items-center justify-content-center ${paymentMethodMain === 'E-Wallet' ? 'btn-active-custom' : ''}}
+                          className={`d-flex align-items-center justify-content-center ${paymentMethodMain === 'E-Wallet' ? 'btn-active-custom' : ''}`}
                           style={{ minWidth: '120px' }}
                           onClick={() => setPaymentMethodMain('E-Wallet')}
                         >

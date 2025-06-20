@@ -7,7 +7,7 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product) => {
     setCartItems((prevItems) => {
-      const existingItemIndex = prevItems.findIndex(item => item.ProductID === product.ProductID);
+      const existingItemIndex = prevItems.findIndex(item => item.product_id === product.product_id);
       if (existingItemIndex !== -1) {
         // If product already in cart, increment quantity
         const updatedItems = [...prevItems];
@@ -21,13 +21,13 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = (productId) => {
-    setCartItems((prevItems) => prevItems.filter(item => item.ProductID !== productId));
+    setCartItems((prevItems) => prevItems.filter(item => item.product_id !== productId));
   };
 
   const incrementQuantity = (productId) => {
     setCartItems((prevItems) => {
       return prevItems.map(item => {
-        if (item.ProductID === productId) {
+        if (item.product_id === productId) {
           return { ...item, quantity: item.quantity + 1 };
         }
         return item;
@@ -38,7 +38,7 @@ export const CartProvider = ({ children }) => {
   const decrementQuantity = (productId) => {
     setCartItems((prevItems) => {
       return prevItems.map(item => {
-        if (item.ProductID === productId && item.quantity > 1) {
+        if (item.product_id === productId && item.quantity > 1) {
           return { ...item, quantity: item.quantity - 1 };
         }
         return item;

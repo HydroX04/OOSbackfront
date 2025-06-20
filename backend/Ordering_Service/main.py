@@ -17,6 +17,9 @@ app.add_middleware(
 
         "http://127.0.0.1:7004",  # This service itself
         "http://localhost:7004",
+
+        "http://127.0.0.1:8001",  # This service itself
+        "http://localhost:8001",
     ],
     allow_credentials=True,
     allow_methods=["*"],
