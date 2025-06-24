@@ -2,10 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
 import './menu.css';
 import { CartContext } from '../contexts/CartContext';
-import axios from 'axios';
 
 const MenuContent = () => {
   const [products, setProducts] = useState({});
@@ -16,17 +16,19 @@ const MenuContent = () => {
   const [orderNotes, setOrderNotes] = useState('');
 
   const { addToCart: addToContextCart } = useContext(CartContext);
-useEffect(() => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('authorization');
-  const username = urlParams.get('username');
+  const navigate = useNavigate();
 
-  if (token && username) {
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('username', username);
-    console.log("Stored from URL:", username, token);
-  }
-}, []);
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('authorization');
+    const username = urlParams.get('username');
+
+    if (token && username) {
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('username', username);
+    }
+  }, []);
+
   useEffect(() => {
     const API_BASE_URL = "http://127.0.0.1:8001";
 
@@ -128,65 +130,39 @@ useEffect(() => {
     setShowModal(true);
   };
 
-  const handleAddToCart = async () => {
-    if (selectedItem) {
-    const token = localStorage.getItem("authToken") || localStorage.getItem("token");
+  const handleAddToCart = () => {
+    if (!selectedItem) return;
+
+    const token = localStorage.getItem("authToken");
     if (!token) {
       toast.error("You must be logged in to add to cart.");
       return;
     }
 
-    // Decode username from JWT
-    let user = null;
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      const payload = JSON.parse(jsonPayload);
-      user = payload.username || payload.sub || null;
-    } catch (e) {
-      console.error("Failed to decode token:", e);
-    }
+    addToContextCart({
+      product_id: selectedItem.ProductID,
+      ProductName: selectedItem.ProductName,
+      ProductPrice: selectedItem.ProductPrice,
+      ProductImage: selectedItem.ProductImage,
+      orderType: "Pick Up"
+    });
 
-    if (!user) {
-      toast.error("You must be logged in to add to cart.");
-      return;
-    }
-
-    try {
-      const response = await axios.post("http://localhost:7004/cart", {
-        username: user,
-        product_id: selectedItem.ProductID,
-        product_name: selectedItem.ProductName,
-        quantity: 1,
-        price: selectedItem.ProductPrice,
-        size: null,
-        type: selectedItem.ProductTypeName,
-        sugar_level: null,
-        add_ons: null,
-        order_type: "Pick Up"
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      toast.success(`${selectedItem.ProductName} added to cart!`);
-      addToContextCart(selectedItem);
-    } catch (error) {
-      console.error("Add to cart failed:", error);
-      toast.error("Failed to add to cart.");
-    }
-  }
-};
-
-  const handleBuyNow = () => {
-    if (selectedItem) toast.info(`Buying ${selectedItem.ProductName} now!`);
+    toast.success(`${selectedItem.ProductName} added to cart!`);
+    handleClose();
+    setOrderNotes('');
   };
 
-  const handleClose = () => setShowModal(false);
+  const handleBuyNow = () => {
+    if (selectedItem) {
+      navigate('/checkout', { state: { cartItems: [{ ...selectedItem, quantity: 1 }], orderType: "Pick Up" } });
+    }
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    setSelectedItem(null);
+    setOrderNotes('');
+  };
 
   const subcategories = products[selectedCategory] ? Object.keys(products[selectedCategory]) : [];
 
@@ -196,14 +172,14 @@ useEffect(() => {
         setSelectedSubcategory(subcategories[0] || '');
       }
     }
-  }, [selectedCategory, products]);
+  }, [selectedCategory, products, selectedSubcategory, subcategories]);
 
   const currentItems = (products[selectedCategory] && products[selectedCategory][selectedSubcategory]) || [];
 
   return (
     <section className="menu-content-section">
       <div className="menu-wrapper">
-        {/* Left Sidebar */}
+        {/* Sidebar */}
         <aside className="menu-sidebar">
           <h2 className="menu-title">Menu</h2>
           <div className="menu-category">
@@ -216,7 +192,7 @@ useEffect(() => {
                       <li
                         key={subcat}
                         onClick={() => handleCategoryClick(productType, subcat)}
-                        style={{ cursor: 'pointer', fontWeight: selectedCategory === productType && selectedSubcategory === subcat ? 'bold' : 'normal' }}
+                        className={selectedCategory === productType && selectedSubcategory === subcat ? 'active' : ''}
                       >
                         {subcat}
                       </li>
@@ -227,52 +203,52 @@ useEffect(() => {
           </div>
         </aside>
 
-        {/* Right Side Content */}
+        {/* Right Side */}
         <div className="menu-items">
-          {/* Search Bar */}
           <div className="search-container w-100">
             <div className="input-group" style={{ maxWidth: '500px' }}>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search Our Coffee, Merch"
-                // Search functionality not implemented as per user request
-              />
-              <button className="btn btn-primary" type="button">
-                🔍
-              </button>
+              <input type="text" className="form-control" placeholder="Search Our Coffee, Merch" />
+              <button className="btn btn-primary" type="button">🔍</button>
             </div>
           </div>
 
-          {/* Breadcrumbs */}
           <nav aria-label="breadcrumb" className="mt-3 mb-4">
             <ol className="breadcrumb">
               <li className="breadcrumb-item">Menu</li>
               {selectedCategory && <li className="breadcrumb-item">{selectedCategory}</li>}
               {selectedSubcategory && <li className="breadcrumb-item">{selectedSubcategory}</li>}
-              {selectedItem && <li className="breadcrumb-item active" aria-current="page">{selectedItem.ProductName}</li>}
             </ol>
           </nav>
 
-          {/* Item Grid */}
           <div className="items-grid">
-            {currentItems.map((item) => (
-              <div
-                className="item-card"
-                key={item.ProductID}
-                onClick={() => handleItemClick(item)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="item-image-placeholder">
-{item.ProductImage ? <img src={item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`} alt={item.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'Image'}
+            {currentItems.map((item) => {
+              const isAvailable = item.Status === 'Available';
+              return (
+                <div
+                  className={`item-card ${!isAvailable ? 'unavailable' : ''}`}
+                  key={item.ProductID}
+                  onClick={() => isAvailable && handleItemClick(item)}
+                  style={{ cursor: isAvailable ? 'pointer' : 'not-allowed' }}
+                >
+                  <div className="item-image-placeholder">
+                    {item.ProductImage ?
+                      <img src={item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`} alt={item.ProductName} />
+                      : 'Image'
+                    }
+                  </div>
+                  <div className="item-name-placeholder">{item.ProductName}</div>
+                  {!isAvailable && (
+                    <div className="unavailable-overlay">
+                      <span>Unavailable</span>
+                    </div>
+                  )}
                 </div>
-                <div className="item-name-placeholder">{item.ProductName}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Modal for Item Details */}
+        {/* Modal */}
         <Modal show={showModal} onHide={handleClose} centered size="lg">
           <Modal.Header closeButton>
             <Modal.Title>{selectedItem ? selectedItem.ProductName : ''}</Modal.Title>
@@ -284,11 +260,11 @@ useEffect(() => {
                   <div className="col-md-6">
                     <div className="modal-image-placeholder">
                       <div className="d-flex align-items-center justify-content-center h-100 bg-light">
-{selectedItem.ProductImage ? (
-  <img src={selectedItem.ProductImage.startsWith('http') ? selectedItem.ProductImage : `http://localhost:8001${selectedItem.ProductImage}`} alt={selectedItem.ProductName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-) : (
-  <span className="text-muted">Item Image</span>
-)}
+                        {selectedItem.ProductImage ? (
+                          <img src={selectedItem.ProductImage.startsWith('http') ? selectedItem.ProductImage : `http://localhost:8001${selectedItem.ProductImage}`} alt={selectedItem.ProductName} style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain' }} />
+                        ) : (
+                          <span className="text-muted">Item Image</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -296,184 +272,18 @@ useEffect(() => {
                     <h4 style={{ color: '#4b929d' }}>{selectedItem.ProductName}</h4>
                     <p className="text-muted">{selectedItem.ProductDescription}</p>
                     <p className="h5" style={{ textAlign: 'left' }}>₱{selectedItem.ProductPrice}</p>
-
-
-                    {/*
-                    
-                    <div className="row mt-4">
-                   
-                      <div className="col-md-6">
-                        <h6>Size:</h6>
-                        <div className="btn-group w-100" role="group">
-                          <input
-                            type="radio"
-                            className="btn-check"
-                            name="size"
-                            id="size-12oz"
-                            autoComplete="off"
-                            defaultChecked
-                          />
-                          <label className="btn btn-outline-secondary" htmlFor="size-12oz">
-                            12oz
-                          </label>
-
-                          <input
-                            type="radio"
-                            className="btn-check"
-                            name="size"
-                            id="size-16oz"
-                            autoComplete="off"
-                          />
-                          <label className="btn btn-outline-secondary" htmlFor="size-16oz">
-                            16oz
-                          </label>
-                        </div>
-                      </div>
-
-                  
-                      <div className="col-md-6">
-                        <h6>Type:</h6>
-                        <div className="btn-group w-100" role="group">
-                          <input
-                            type="radio"
-                            className="btn-check"
-                            name="type"
-                            id="type-hot"
-                            autoComplete="off"
-                            defaultChecked
-                          />
-                          <label className="btn btn-outline-secondary" htmlFor="type-hot">
-                            Hot
-                          </label>
-
-                          <input
-                            type="radio"
-                            className="btn-check"
-                            name="type"
-                            id="type-cold"
-                            autoComplete="off"
-                          />
-                          <label className="btn btn-outline-secondary" htmlFor="type-cold">
-                            Cold
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-
-           
-                    <div className="mt-3">
-                      <h6>Sugar Level:</h6>
-                      <div className="btn-group w-100" role="group">
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="sugar-level"
-                          id="sugar-none"
-                          autoComplete="off"
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="sugar-none">
-                          No sugar
-                        </label>
-
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="sugar-level"
-                          id="sugar-low"
-                          autoComplete="off"
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="sugar-low">
-                          5%
-                        </label>
-
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="sugar-level"
-                          id="sugar-medium"
-                          autoComplete="off"
-                          defaultChecked
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="sugar-medium">
-                          50%
-                        </label>
-
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="sugar-level"
-                          id="sugar-high"
-                          autoComplete="off"
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="sugar-high">
-                          100%
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="mt-3">
-                      <h6>Adds on:</h6>
-                      <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="espresso-shot" />
-                        <label className="form-check-label" htmlFor="espresso-shot">
-                          Espresso Shot ₱50
-                        </label>
-                      </div>
-                      <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="seasalt-cream" />
-                        <label className="form-check-label" htmlFor="seasalt-cream">
-                          Seasalt cream ₱30
-                        </label>
-                      </div>
-                      <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="syrup-sauces" />
-                        <label className="form-check-label" htmlFor="syrup-sauces">
-                          Syrup/Sauces ₱50
-                        </label>
-                      </div>
-                    </div>
-                    */}
-
-                    {/* Order Method */}
                     <div className="mt-4">
                       <h6>Order method:</h6>
                       <div className="btn-group w-100" role="group">
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="order-method"
-                          id="method-pickup"
-                          autoComplete="off"
-                          defaultChecked
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="method-pickup">
-                          Pickup
-                        </label>
-
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name="order-method"
-                          id="method-delivery"
-                          autoComplete="off"
-                        />
-                        <label className="btn btn-outline-secondary" htmlFor="method-delivery">
-                          Delivery
-                        </label>
+                        <input type="radio" className="btn-check" name="order-method" id="method-pickup" autoComplete="off" defaultChecked />
+                        <label className="btn btn-outline-secondary" htmlFor="method-pickup">Pickup</label>
+                        <input type="radio" className="btn-check" name="order-method" id="method-delivery" autoComplete="off" />
+                        <label className="btn btn-outline-secondary" htmlFor="method-delivery">Delivery</label>
                       </div>
                     </div>
-
-                    {/* Add Notes */}
                     <div className="mt-3">
                       <label htmlFor="order-notes" className="form-label">Add Notes:</label>
-                      <textarea
-                        id="order-notes"
-                        className="form-control"
-                        rows="3"
-                        placeholder="Add any special instructions or notes here"
-                        value={orderNotes}
-                        onChange={(e) => setOrderNotes(e.target.value)}
-                      />
+                      <textarea id="order-notes" className="form-control" rows="3" placeholder="Add any special instructions or notes here" value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)} />
                     </div>
                   </div>
                 </div>
@@ -481,16 +291,10 @@ useEffect(() => {
             )}
           </Modal.Body>
           <Modal.Footer className="justify-content-between">
-            <Button variant="outline-secondary" onClick={handleClose}>
-              Close
-            </Button>
+            <Button variant="outline-secondary" onClick={handleClose}>Close</Button>
             <div>
-              <Button variant="outline-primary" className="me-2" onClick={handleAddToCart}>
-                Add to cart
-              </Button>
-              <Button variant="primary" onClick={handleBuyNow}>
-                Buy Now
-              </Button>
+              <Button variant="outline-primary" className="me-2" onClick={handleAddToCart}>Add to cart</Button>
+              <Button variant="primary" onClick={handleBuyNow}>Buy Now</Button>
             </div>
           </Modal.Footer>
         </Modal>

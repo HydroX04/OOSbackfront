@@ -13,6 +13,7 @@ router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http://localhost:4000/auth/token")
 
+
 async def validate_token_and_roles(token: str, allowed_roles: List[str]):
     USER_SERVICE_ME_URL = "http://localhost:4000/auth/users/me"
     async with httpx.AsyncClient() as client:
@@ -31,7 +32,7 @@ async def validate_token_and_roles(token: str, allowed_roles: List[str]):
     if user_data.get("userRole") not in allowed_roles:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied.")
 
-# Pydantic models
+
 class CartItem(BaseModel):
     username: str
     product_id: int
@@ -41,12 +42,13 @@ class CartItem(BaseModel):
     size: Optional[str] = None
     type: Optional[str] = None
     sugar_level: Optional[str] = None
-    add_ons: Optional[str] = None  # You may convert this to List[str] if you use JSON
+    add_ons: Optional[str] = None
     order_type: str
 
+
 class CartResponse(BaseModel):
-    cart_id: int
-    product_id: int
+    order_item_id: int
+    product_id: Optional[int]
     product_name: str
     quantity: int
     price: float
@@ -58,83 +60,200 @@ class CartResponse(BaseModel):
     status: str
     created_at: str
 
-# GET: Retrieve user's cart
+
+class DeliveryInfoRequest(BaseModel):
+    FirstName: str
+    MiddleName: Optional[str] = None
+    LastName: str
+    Address: str
+    City: str
+    Province: str
+    Landmark: Optional[str] = None
+    EmailAddress: Optional[str] = None
+    PhoneNumber: str
+    Notes: Optional[str] = None
+
+
+@router.post("/deliveryinfo", status_code=status.HTTP_201_CREATED)
+async def add_delivery_info(delivery_info: DeliveryInfoRequest, token: str = Depends(oauth2_scheme)):
+    await validate_token_and_roles(token, ["user", "admin", "staff"])
+    conn = await get_db_connection()
+    cursor = await conn.cursor()
+    try:
+        await cursor.execute("""
+            INSERT INTO DeliveryInfo (
+                FirstName, MiddleName, LastName, Address, City, Province, Landmark, EmailAddress, PhoneNumber, Notes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            delivery_info.FirstName,
+            delivery_info.MiddleName,
+            delivery_info.LastName,
+            delivery_info.Address,
+            delivery_info.City,
+            delivery_info.Province,
+            delivery_info.Landmark,
+            delivery_info.EmailAddress,
+            delivery_info.PhoneNumber,
+            delivery_info.Notes
+        ))
+        await conn.commit()
+    except Exception as e:
+        logger.error(f"Error adding delivery info: {e}")
+        raise HTTPException(status_code=500, detail="Failed to add delivery info")
+    finally:
+        await cursor.close()
+        await conn.close()
+    return {"message": "Delivery info added successfully"}
+
+
 @router.get("/{username}", response_model=List[CartResponse])
 async def get_cart(username: str, token: str = Depends(oauth2_scheme)):
     await validate_token_and_roles(token, ["user", "admin", "staff"])
     conn = await get_db_connection()
     cursor = await conn.cursor()
+
     await cursor.execute("""
-        SELECT CartID, ProductID, ProductName, Quantity, Price, Size, Type, SugarLevel, AddOns, OrderType, Status, CreatedAt
-        FROM Cart
-        WHERE Username = ? AND Status = 'in_cart'
+        SELECT OrderID, OrderDate, Status
+        FROM Orders
+        WHERE UserName = ? AND Status = 'Pending'
+        ORDER BY OrderDate DESC
+        OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY
     """, (username,))
-    rows = await cursor.fetchall()
+    order = await cursor.fetchone()
+
+    if not order:
+        await cursor.close()
+        await conn.close()
+        return []
+
+    order_id = order[0]
+
+    await cursor.execute("""
+        SELECT OrderItemID, ProductName, Quantity, Price
+        FROM OrderItems
+        WHERE OrderID = ?
+    """, (order_id,))
+    items = await cursor.fetchall()
     await cursor.close()
     await conn.close()
 
     cart = []
-    for row in rows:
+    for item in items:
         cart.append(CartResponse(
-            cart_id=row[0],
-            product_id=row[1],
-            product_name=row[2],
-            quantity=row[3],
-            price=row[4],
-            size=row[5],
-            type=row[6],
-            sugar_level=row[7],
-            add_ons=row[8],
-            order_type=row[9],
-            status=row[10],
-            created_at=row[11].strftime("%Y-%m-%d %H:%M:%S")
+            order_item_id=item[0],
+            product_id=None,
+            product_name=item[1],
+            quantity=item[2],
+            price=float(item[3]),
+            size=None,
+            type=None,
+            sugar_level=None,
+            add_ons=None,
+            order_type=order[2],
+            status=order[2],
+            created_at=order[1].strftime("%Y-%m-%d %H:%M:%S")
         ))
     return cart
 
-# POST: Add to cart
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def add_to_cart(item: CartItem, token: str = Depends(oauth2_scheme)):
     await validate_token_and_roles(token, ["user", "admin", "staff"])
     conn = await get_db_connection()
     cursor = await conn.cursor()
     try:
-        logger.info(f"Adding to cart: {item}")
-        from datetime import datetime
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         await cursor.execute("""
-            INSERT INTO Cart (Username, ProductID, ProductName, Quantity, Price, Size, Type, SugarLevel, AddOns, OrderType, Status, CreatedAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_cart', ?)
-        """, (
-            item.username,
-            item.product_id,
-            item.product_name,
-            item.quantity,
-            item.price,
-            item.size,
-            item.type,
-            item.sugar_level,
-            item.add_ons,
-            item.order_type,
-            current_time
-        ))
+            SELECT OrderID
+            FROM Orders
+            WHERE UserName = ? AND Status = 'Pending'
+            ORDER BY OrderDate DESC
+            OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY
+        """, (item.username,))
+        order = await cursor.fetchone()
+
+        if order:
+            order_id = order[0]
+        else:
+            await cursor.execute("""
+                INSERT INTO Orders (UserName, OrderType, PaymentMethod, Subtotal, DeliveryFee, TotalAmount, DeliveryNotes, Status)
+                OUTPUT INSERTED.OrderID
+                VALUES (?, ?, ?, 0, 0, 0, '', 'Pending')
+            """, (item.username, item.order_type, 'Cash'))
+            row = await cursor.fetchone()
+            order_id = row[0] if row else None
+
+        # Check if product already in OrderItems
+        await cursor.execute("""
+            SELECT OrderItemID, Quantity FROM OrderItems
+            WHERE OrderID = ? AND ProductName = ? AND ProductType = ?
+        """, (order_id, item.product_name, item.type or ''))
+
+        existing_item = await cursor.fetchone()
+
+        if existing_item:
+            order_item_id, current_qty = existing_item
+            await cursor.execute("""
+                UPDATE OrderItems
+                SET Quantity = ?
+                WHERE OrderItemID = ?
+            """, (current_qty + item.quantity, order_item_id))
+        else:
+            await cursor.execute("""
+                INSERT INTO OrderItems (OrderID, ProductName, ProductType, Category, Quantity, Price)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                order_id,
+                item.product_name,
+                item.type or '',
+                '',  # Extend later for category
+                item.quantity,
+                item.price
+            ))
+
         await conn.commit()
+
     except Exception as e:
         logger.error(f"Error adding to cart: {e}")
         raise HTTPException(status_code=500, detail="Failed to add item to cart")
     finally:
         await cursor.close()
         await conn.close()
+
     return {"message": "Item added to cart"}
 
-# DELETE: Remove from cart
-@router.delete("/{cart_id}", status_code=status.HTTP_200_OK)
-async def remove_from_cart(cart_id: int, token: str = Depends(oauth2_scheme)):
+
+@router.put("/quantity/{order_item_id}")
+async def update_quantity(order_item_id: int, new_quantity: int, token: str = Depends(oauth2_scheme)):
+    await validate_token_and_roles(token, ["user", "admin", "staff"])
+    if new_quantity <= 0:
+        raise HTTPException(status_code=400, detail="Quantity must be at least 1")
+
+    conn = await get_db_connection()
+    cursor = await conn.cursor()
+    try:
+        await cursor.execute("""
+            UPDATE OrderItems
+            SET Quantity = ?
+            WHERE OrderItemID = ?
+        """, (new_quantity, order_item_id))
+        await conn.commit()
+    except Exception as e:
+        logger.error(f"Error updating quantity: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update quantity")
+    finally:
+        await cursor.close()
+        await conn.close()
+    return {"message": "Quantity updated"}
+
+
+@router.delete("/{order_item_id}", status_code=status.HTTP_200_OK)
+async def remove_from_cart(order_item_id: int, token: str = Depends(oauth2_scheme)):
     await validate_token_and_roles(token, ["user", "admin", "staff"])
     conn = await get_db_connection()
     cursor = await conn.cursor()
     try:
-        logger.info(f"Removing from cart: {cart_id}")
-        await cursor.execute("DELETE FROM Cart WHERE CartID = ?", (cart_id,))
+        logger.info(f"Removing from cart: {order_item_id}")
+        await cursor.execute("DELETE FROM OrderItems WHERE OrderItemID = ?", (order_item_id,))
         await conn.commit()
     except Exception as e:
         logger.error(f"Error removing from cart: {e}")
@@ -143,3 +262,37 @@ async def remove_from_cart(cart_id: int, token: str = Depends(oauth2_scheme)):
         await cursor.close()
         await conn.close()
     return {"message": "Item removed from cart"}
+
+
+@router.post("/finalize", status_code=status.HTTP_200_OK)
+async def finalize_order(username: str, token: str = Depends(oauth2_scheme)):
+    await validate_token_and_roles(token, ["user", "admin", "staff"])
+    conn = await get_db_connection()
+    cursor = await conn.cursor()
+    try:
+        # Find the latest pending order for the user
+        await cursor.execute("""
+            SELECT OrderID FROM Orders
+            WHERE UserName = ? AND Status = 'Pending'
+            ORDER BY OrderDate DESC
+            OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY
+        """, (username,))
+        order = await cursor.fetchone()
+        if not order:
+            raise HTTPException(status_code=404, detail="No pending order found")
+
+        order_id = order[0]
+
+        # Update order status to Confirmed
+        await cursor.execute("""
+            UPDATE Orders
+            SET Status = 'Confirmed'
+            WHERE OrderID = ?
+        """, (order_id,))
+        await conn.commit()
+    except Exception as e:
+        logger.error(f"Error finalizing order: {e}")
+        raise HTTPException(status_code=500, detail="Failed to finalize order")
+    finally:
+        await cursor.close()
+        await conn.close()
