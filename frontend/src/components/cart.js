@@ -120,7 +120,7 @@ const Cart = () => {
 
   const handleCheckoutClick = (e) => {
     e.preventDefault();
-    navigate('/checkout');
+    navigate('/checkout', { state: { orderTypeMain, paymentMethodMain } });
   };
 
   const handleConfirmOrder = () => {
