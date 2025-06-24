@@ -2,10 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
-import './menu.css'; // Make sure you have this CSS file and add the new styles to it
+import './menu.css';
 import { CartContext } from '../contexts/CartContext';
-import axios from 'axios';
 
 const MenuContent = () => {
   const [products, setProducts] = useState({});
@@ -16,6 +16,7 @@ const MenuContent = () => {
   const [orderNotes, setOrderNotes] = useState('');
 
   const { addToCart: addToContextCart } = useContext(CartContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -25,7 +26,6 @@ const MenuContent = () => {
     if (token && username) {
       localStorage.setItem('authToken', token);
       localStorage.setItem('username', username);
-      console.log("Stored from URL:", username, token);
     }
   }, []);
 
@@ -85,7 +85,6 @@ const MenuContent = () => {
             setSelectedSubcategory("");
           }
         } else {
-          // Public fetching logic remains the same
           const publicResponse = await fetch(`${API_BASE_URL}/is_products/public/products/`);
           if (!publicResponse.ok) throw new Error("Failed to fetch public product data.");
           const publicProducts = await publicResponse.json();
@@ -98,7 +97,7 @@ const MenuContent = () => {
             if (!grouped[typeName][category]) grouped[typeName][category] = [];
             grouped[typeName][category].push({
               ...product,
-              Status: "Available", // Assume public products are available
+              Status: "Available",
             });
           });
 
@@ -131,79 +130,38 @@ const MenuContent = () => {
     setShowModal(true);
   };
 
-  // --- MODIFIED & FIXED FUNCTION ---
-  const handleAddToCart = async () => {
-    if (selectedItem) {
-      const token = localStorage.getItem("authToken") || localStorage.getItem("token");
-      if (!token) {
-        toast.error("You must be logged in to add to cart.");
-        return;
-      }
+  const handleAddToCart = () => {
+    if (!selectedItem) return;
 
-      let user = null;
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        const payload = JSON.parse(jsonPayload);
-        user = payload.username || payload.sub || null;
-      } catch (e) {
-        console.error("Failed to decode token:", e);
-      }
-
-      if (!user) {
-        toast.error("You must be logged in to add to cart.");
-        return;
-      }
-
-      try {
-        // This response is not used, but good to have if the API returns something useful
-        await axios.post("http://localhost:7004/cart", {
-          username: user,
-          product_id: selectedItem.ProductID,
-          product_name: selectedItem.ProductName,
-          quantity: 1,
-          price: selectedItem.ProductPrice,
-          size: null,
-          type: selectedItem.ProductTypeName,
-          sugar_level: null,
-          add_ons: null,
-          order_type: "Pick Up"
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        toast.success(`${selectedItem.ProductName} added to cart!`);
-        addToContextCart({
-          product_id: selectedItem.ProductID,
-          ProductName: selectedItem.ProductName,
-          ProductPrice: selectedItem.ProductPrice,
-          ProductImage: selectedItem.ProductImage,
-          orderType: "Pick Up"
-        }); // Corrected closing parenthesis here
-
-        handleClose(); // Close modal after successful add
-        setOrderNotes(''); // Reset notes for next item
-        
-      } catch (error) {
-        console.error("Add to cart failed:", error);
-        toast.error("Failed to add to cart.");
-      }
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast.error("You must be logged in to add to cart.");
+      return;
     }
+
+    addToContextCart({
+      product_id: selectedItem.ProductID,
+      ProductName: selectedItem.ProductName,
+      ProductPrice: selectedItem.ProductPrice,
+      ProductImage: selectedItem.ProductImage,
+      orderType: "Pick Up"
+    });
+
+    toast.success(`${selectedItem.ProductName} added to cart!`);
+    handleClose();
+    setOrderNotes('');
   };
 
   const handleBuyNow = () => {
-    if (selectedItem) toast.info(`Buying ${selectedItem.ProductName} now!`);
+    if (selectedItem) {
+      navigate('/checkout', { state: { cartItems: [{ ...selectedItem, quantity: 1 }], orderType: "Pick Up" } });
+    }
   };
 
   const handleClose = () => {
     setShowModal(false);
-    setSelectedItem(null); // Deselect item on close
-    setOrderNotes(''); // Reset notes on close
+    setSelectedItem(null);
+    setOrderNotes('');
   };
 
   const subcategories = products[selectedCategory] ? Object.keys(products[selectedCategory]) : [];
@@ -221,7 +179,7 @@ const MenuContent = () => {
   return (
     <section className="menu-content-section">
       <div className="menu-wrapper">
-        {/* Left Sidebar */}
+        {/* Sidebar */}
         <aside className="menu-sidebar">
           <h2 className="menu-title">Menu</h2>
           <div className="menu-category">
@@ -245,9 +203,8 @@ const MenuContent = () => {
           </div>
         </aside>
 
-        {/* Right Side Content */}
+        {/* Right Side */}
         <div className="menu-items">
-          {/* Search Bar */}
           <div className="search-container w-100">
             <div className="input-group" style={{ maxWidth: '500px' }}>
               <input type="text" className="form-control" placeholder="Search Our Coffee, Merch" />
@@ -255,7 +212,6 @@ const MenuContent = () => {
             </div>
           </div>
 
-          {/* Breadcrumbs */}
           <nav aria-label="breadcrumb" className="mt-3 mb-4">
             <ol className="breadcrumb">
               <li className="breadcrumb-item">Menu</li>
@@ -264,7 +220,6 @@ const MenuContent = () => {
             </ol>
           </nav>
 
-          {/* --- MODIFIED ITEM GRID --- */}
           <div className="items-grid">
             {currentItems.map((item) => {
               const isAvailable = item.Status === 'Available';
@@ -276,14 +231,12 @@ const MenuContent = () => {
                   style={{ cursor: isAvailable ? 'pointer' : 'not-allowed' }}
                 >
                   <div className="item-image-placeholder">
-                    {item.ProductImage ? 
-                      <img src={item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`} alt={item.ProductName} /> 
+                    {item.ProductImage ?
+                      <img src={item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`} alt={item.ProductName} />
                       : 'Image'
                     }
                   </div>
                   <div className="item-name-placeholder">{item.ProductName}</div>
-
-                  {/* This is the new overlay for unavailable items */}
                   {!isAvailable && (
                     <div className="unavailable-overlay">
                       <span>Unavailable</span>
@@ -295,13 +248,12 @@ const MenuContent = () => {
           </div>
         </div>
 
-        {/* Modal for Item Details */}
+        {/* Modal */}
         <Modal show={showModal} onHide={handleClose} centered size="lg">
-            {/* Modal content is unchanged, but included for completeness */}
-            <Modal.Header closeButton>
-                <Modal.Title>{selectedItem ? selectedItem.ProductName : ''}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
+          <Modal.Header closeButton>
+            <Modal.Title>{selectedItem ? selectedItem.ProductName : ''}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
             {selectedItem && (
               <div className="container">
                 <div className="row">
@@ -309,9 +261,9 @@ const MenuContent = () => {
                     <div className="modal-image-placeholder">
                       <div className="d-flex align-items-center justify-content-center h-100 bg-light">
                         {selectedItem.ProductImage ? (
-                        <img src={selectedItem.ProductImage.startsWith('http') ? selectedItem.ProductImage : `http://localhost:8001${selectedItem.ProductImage}`} alt={selectedItem.ProductName} style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain' }} />
+                          <img src={selectedItem.ProductImage.startsWith('http') ? selectedItem.ProductImage : `http://localhost:8001${selectedItem.ProductImage}`} alt={selectedItem.ProductName} style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain' }} />
                         ) : (
-                        <span className="text-muted">Item Image</span>
+                          <span className="text-muted">Item Image</span>
                         )}
                       </div>
                     </div>

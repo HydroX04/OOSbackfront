@@ -61,6 +61,51 @@ class CartResponse(BaseModel):
     created_at: str
 
 
+class DeliveryInfoRequest(BaseModel):
+    FirstName: str
+    MiddleName: Optional[str] = None
+    LastName: str
+    Address: str
+    City: str
+    Province: str
+    Landmark: Optional[str] = None
+    EmailAddress: Optional[str] = None
+    PhoneNumber: str
+    Notes: Optional[str] = None
+
+
+@router.post("/deliveryinfo", status_code=status.HTTP_201_CREATED)
+async def add_delivery_info(delivery_info: DeliveryInfoRequest, token: str = Depends(oauth2_scheme)):
+    await validate_token_and_roles(token, ["user", "admin", "staff"])
+    conn = await get_db_connection()
+    cursor = await conn.cursor()
+    try:
+        await cursor.execute("""
+            INSERT INTO DeliveryInfo (
+                FirstName, MiddleName, LastName, Address, City, Province, Landmark, EmailAddress, PhoneNumber, Notes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            delivery_info.FirstName,
+            delivery_info.MiddleName,
+            delivery_info.LastName,
+            delivery_info.Address,
+            delivery_info.City,
+            delivery_info.Province,
+            delivery_info.Landmark,
+            delivery_info.EmailAddress,
+            delivery_info.PhoneNumber,
+            delivery_info.Notes
+        ))
+        await conn.commit()
+    except Exception as e:
+        logger.error(f"Error adding delivery info: {e}")
+        raise HTTPException(status_code=500, detail="Failed to add delivery info")
+    finally:
+        await cursor.close()
+        await conn.close()
+    return {"message": "Delivery info added successfully"}
+
+
 @router.get("/{username}", response_model=List[CartResponse])
 async def get_cart(username: str, token: str = Depends(oauth2_scheme)):
     await validate_token_and_roles(token, ["user", "admin", "staff"])
@@ -217,3 +262,37 @@ async def remove_from_cart(order_item_id: int, token: str = Depends(oauth2_schem
         await cursor.close()
         await conn.close()
     return {"message": "Item removed from cart"}
+
+
+@router.post("/finalize", status_code=status.HTTP_200_OK)
+async def finalize_order(username: str, token: str = Depends(oauth2_scheme)):
+    await validate_token_and_roles(token, ["user", "admin", "staff"])
+    conn = await get_db_connection()
+    cursor = await conn.cursor()
+    try:
+        # Find the latest pending order for the user
+        await cursor.execute("""
+            SELECT OrderID FROM Orders
+            WHERE UserName = ? AND Status = 'Pending'
+            ORDER BY OrderDate DESC
+            OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY
+        """, (username,))
+        order = await cursor.fetchone()
+        if not order:
+            raise HTTPException(status_code=404, detail="No pending order found")
+
+        order_id = order[0]
+
+        # Update order status to Confirmed
+        await cursor.execute("""
+            UPDATE Orders
+            SET Status = 'Confirmed'
+            WHERE OrderID = ?
+        """, (order_id,))
+        await conn.commit()
+    except Exception as e:
+        logger.error(f"Error finalizing order: {e}")
+        raise HTTPException(status_code=500, detail="Failed to finalize order")
+    finally:
+        await cursor.close()
+        await conn.close()

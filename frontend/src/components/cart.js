@@ -59,10 +59,15 @@ const Cart = () => {
   };
 
   const handleRemove = (index) => {
-    const productId = cartItems[index].product_id;
-    removeFromCart(productId);
-    setSelectedCartItems(prev => prev.filter(item => item.product_id !== productId));
-  };
+  const product = cartItems[index];
+
+  if (product.quantity > 1) {
+    decrementQuantity(product.product_id);
+  } else {
+    removeFromCart(product.product_id);
+    setSelectedCartItems(prev => prev.filter(item => item.product_id !== product.product_id));
+  }
+};
 
   const calculateTotal = (item) => item.ProductPrice * item.quantity;
 
@@ -189,7 +194,7 @@ const Cart = () => {
                           type="checkbox"
                           style={{ margin: 0 }}
                           onChange={(e) => handleCheckboxChange(item, e.target.checked)}
-                          checked={selectedCartItems.some(ci => ci.ProductID === item.ProductID)}
+                          checked={selectedCartItems.some(ci => ci.product_id === item.product_id)}
                         />
                       </td>
                       <td style={{ verticalAlign: 'middle' }}>
