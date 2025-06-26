@@ -158,110 +158,84 @@ const Cart = () => {
               <span className="fw-semibold">{cartItems.length} Items</span>
             </div>
             <div className="table-responsive">
-              <table className="table align-middle" style={{ tableLayout: 'fixed' }}>
-                <colgroup>
-                  <col style={{ width: '30px' }} /> {/* Checkbox column */}
-                  <col style={{ width: '25%' }} /> {/* Product */}
-                  <col style={{ width: '15%' }} /> {/* Quantity */}
-                  <col style={{ width: '15%' }} /> {/* Price */}
-                  <col style={{ width: '18%' }} /> {/* Total - increased width */}
-                  <col style={{ width: '17%' }} /> {/* Order Type - increased width */}
-                  <col style={{ width: '10%' }} /> {/* Actions - reduced width */}
-                </colgroup>
-                <thead>
-                  <tr style={{ color: '#4B929D', verticalAlign: 'middle' }}>
-                    <th style={{ verticalAlign: 'middle', textAlign: 'center', width: '30px', padding: '0 5px' }}>
-                      <input
-                        type="checkbox"
-                        style={{ margin: 0 }}
-                        onChange={(e) => handleSelectAllChange(e.target.checked)}
-                        checked={selectedCartItems.length === cartItems.length && cartItems.length > 0}
-                      />
-                    </th>
-                    <th style={{ verticalAlign: 'middle' }}>Product</th>
-                    <th style={{ verticalAlign: 'middle', textAlign: 'center' }}>Quantity</th>
-                    <th style={{ verticalAlign: 'middle', textAlign: 'right' }}>Price</th>
-                    <th style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '63px' }}>Total</th>
-                    <th style={{ verticalAlign: 'middle', paddingLeft: '20px' }}>Order Type</th>
-                    <th style={{ verticalAlign: 'middle' }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cartItems.map((item, i) => (
-                    <tr key={i}>
-                      <td style={{ verticalAlign: 'middle', textAlign: 'center', width: '30px', padding: '0 5px' }}>
-                        <input
-                          type="checkbox"
-                          style={{ margin: 0 }}
-                          onChange={(e) => handleCheckboxChange(item, e.target.checked)}
-                          checked={selectedCartItems.some(ci => ci.product_id === item.product_id)}
-                        />
-                      </td>
-                      <td style={{ verticalAlign: 'middle' }}>
-                        <div className="d-flex align-items-center">
-                          <img
-                            src={item.ProductImage ? (item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`) : "https://via.placeholder.com/60"}
-                            alt={item.ProductName}
-                            className="img-fluid me-2 rounded"
-                            style={{ height: '60px', width: '60px', objectFit: 'cover' }}
-                          />
-                          <div>
-                            <div className="fw-semibold">{item.ProductName}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-                        <div className="d-flex align-items-center justify-content-center">
-                          <button
-                            className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
-                            style={{
-                              backgroundColor: '#4B929D',
-                              color: 'white',
-                              border: 'none',
-                              width: '30px',
-                              height: '30px',
-                              padding: '0',
-                            }}
-                            onClick={() => handleDecrement(i)}
-                          >
-                            -
-                          </button>
-                          <span className="mx-2" style={{ minWidth: '20px', textAlign: 'center' }}>
-                            {item.quantity}
-                          </span>
-                          <button
-                            className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
-                            style={{
-                              backgroundColor: '#4B929D',
-                              color: 'white',
-                              border: 'none',
-                              width: '30px',
-                              height: '30px',
-                              padding: '0',
-                            }}
-                            onClick={() => handleIncrement(i)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </td>
-                      <td style={{ verticalAlign: 'middle', textAlign: 'right' }}>₱{item.ProductPrice.toFixed(2)}</td>
-                      <td style={{ verticalAlign: 'middle', textAlign: 'right', paddingRight: '50px' }}>₱{calculateTotal(item).toFixed(2)}</td>
-                      <td style={{ verticalAlign: 'middle', paddingLeft: '20px' }}>{item.orderType}</td>
-                      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-                        <button
-                          className="btn btn-link text-danger p-0"
-                          onClick={() => handleRemove(i)}
-                        >
-                          <i className="bi bi-trash" style={{ fontSize: '1.2rem' }}></i>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-
-                </tbody>
-              </table>
+  <table className="table align-middle" style={{ tableLayout: 'fixed' }}>
+    <colgroup>
+      <col style={{ width: '30px' }} />   {/* Checkbox */}
+      <col style={{ width: '18%' }} />   {/* Product */}
+      <col style={{ width: '14%' }} />   {/* Product Type */}
+      <col style={{ width: '14%' }} />   {/* Product Category */}
+      <col style={{ width: '10%' }} />   {/* Quantity */}
+      <col style={{ width: '10%' }} />   {/* Price */}
+      <col style={{ width: '10%' }} />   {/* Total */}
+      <col style={{ width: '10%' }} />   {/* Order Type */}
+      <col style={{ width: '10%' }} />   {/* Actions */}
+    </colgroup>
+    <thead>
+      <tr style={{ color: '#4B929D', verticalAlign: 'middle' }}>
+        <th style={{ textAlign: 'center' }}>
+          <input
+            type="checkbox"
+            style={{ margin: 0 }}
+            onChange={(e) => handleSelectAllChange(e.target.checked)}
+            checked={selectedCartItems.length === cartItems.length && cartItems.length > 0}
+          />
+        </th>
+        <th>Product</th>
+        <th>Product Type</th>
+        <th>Product Category</th>
+        <th style={{ textAlign: 'center' }}>Qty</th>
+        <th style={{ textAlign: 'right' }}>Price</th>
+        <th style={{ textAlign: 'right' }}>Total</th>
+        <th style={{ paddingLeft: '10px' }}>Order Type</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {cartItems.map((item, i) => (
+        <tr key={i}>
+          <td style={{ textAlign: 'center' }}>
+            <input
+              type="checkbox"
+              onChange={(e) => handleCheckboxChange(item, e.target.checked)}
+              checked={selectedCartItems.some(ci => ci.product_id === item.product_id)}
+            />
+          </td>
+          <td>
+            <div className="d-flex align-items-center">
+              <img
+                src={item.ProductImage ? (item.ProductImage.startsWith('http') ? item.ProductImage : `http://localhost:8001${item.ProductImage}`) : "https://via.placeholder.com/60"}
+                alt={item.ProductName}
+                className="img-fluid me-2 rounded"
+                style={{ height: '60px', width: '60px', objectFit: 'cover' }}
+              />
+              <div>
+                <div className="fw-semibold">{item.ProductName}</div>
+              </div>
             </div>
+          </td>
+          <td style={{ verticalAlign: 'middle' }}>{item.ProductType || '-'}</td>
+          <td style={{ verticalAlign: 'middle' }}>{item.ProductCategory || '-'}</td>
+          <td style={{ textAlign: 'center' }}>
+            <div className="d-flex align-items-center justify-content-center">
+              <button className="btn btn-sm rounded-circle" onClick={() => handleDecrement(i)}>-</button>
+              <span className="mx-2">{item.quantity}</span>
+              <button className="btn btn-sm rounded-circle" onClick={() => handleIncrement(i)}>+</button>
+            </div>
+          </td>
+          <td style={{ textAlign: 'right' }}>₱{item.ProductPrice.toFixed(2)}</td>
+          <td style={{ textAlign: 'right' }}>₱{calculateTotal(item).toFixed(2)}</td>
+          <td style={{ paddingLeft: '10px' }}>{item.orderType}</td>
+          <td style={{ textAlign: 'center' }}>
+            <button className="btn btn-link text-danger p-0" onClick={() => handleRemove(i)}>
+              <i className="bi bi-trash" style={{ fontSize: '1.2rem' }}></i>
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
           </div>
         </div>
 
@@ -386,4 +360,4 @@ const Cart = () => {
   );
 };
 
-export default Cart;  
+export default Cart;
